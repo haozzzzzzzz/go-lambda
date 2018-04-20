@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator"
+	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/haozzzzzzzz/go-rapid-development/web/ginbuilder/api"
 	"github.com/serenize/snaker.git"
 	"github.com/sirupsen/logrus"
@@ -24,7 +25,13 @@ func CommandAddApiFunction() *cobra.Command {
 				return
 			}
 
-			apiItem.ApiHandlerPackage = snaker.CamelToSnake(filepath.Base(path))
+			curDir := filepath.Base(path)
+			if curDir == "api" && file.PathExists(fmt.Sprintf("%s/routers.go", path)) {
+				logrus.Errorf("api file can not has same directory as routers.go")
+				return
+			}
+
+			apiItem.ApiHandlerPackage = snaker.CamelToSnake(curDir)
 			apiItem.SourceFile = fmt.Sprintf("%s/api_%s.go", path, strings.ToLower(apiItem.ApiHandlerFunc))
 			err = validator.New().Struct(apiItem)
 			if nil != err {
