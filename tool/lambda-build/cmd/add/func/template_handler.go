@@ -41,7 +41,7 @@ import (
 var ginLambda *ginadapter.GinLambda
 
 func NewGinLambda() (err error) {
-	logrus.Infof("Lambda function %q initializing...", constant.LambdaFunctionName)
+	logrus.Infof("Lambda function %s initializing...", constant.LambdaFunctionName)
 	ginEngine := ginbuilder.GetEngine()
 	err = api.BindRouters(ginEngine)
 	if nil != err {
