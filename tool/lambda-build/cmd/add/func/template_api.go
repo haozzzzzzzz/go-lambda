@@ -36,9 +36,9 @@ func generateApiTemplate(lambdaFunc *LambdaFunction) (err error) {
 	err = api.CreateApiSource(&api.ApiItem{
 		HttpMethod:        "GET",
 		RelativePath:      "/metric",
-		ApiHandlerFunc:    "Info",
+		ApiHandlerFunc:    "MetricHandlerFunc",
 		ApiHandlerPackage: "metric",
-		SourceFile:        fmt.Sprintf("%s/api_info.go", metricDir),
+		SourceFile:        fmt.Sprintf("%s/api_metric.go", metricDir),
 	})
 	if nil != err {
 		logrus.Errorf("create api metric/api_info.go file failed. \n%s.", err)
