@@ -1,13 +1,15 @@
 package _func
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"github.com/go-playground/validator"
+	"github.com/haozzzzzzzz/go-rapid-development/tools/goimports"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -15,6 +17,7 @@ import (
 // 添加lambda函数命令
 func CommandAddLambdaFunction() *cobra.Command {
 	var handler LambdaFunction
+	handler.Mode = os.ModePerm
 	var cmd = &cobra.Command{
 		Use:   "func",
 		Short: "add lambda function",
@@ -36,47 +39,82 @@ func CommandAddLambdaFunction() *cobra.Command {
 
 // 添加Lambda函数命令处理器
 type LambdaFunction struct {
-	Name string `json:"name" validate:"required"`
-	Path string `json:"path" validate:"required"`
+	Name        string      `json:"name" validate:"required"`
+	Path        string      `json:"path" validate:"required"`
+	Mode        os.FileMode `json:"mode" validate:"required"`
+	ProjectPath string      `json:"project_path"`
 }
 
 func (m *LambdaFunction) Run() (err error) {
+	/**
+	这并不是Go的Bug，包括Linux系统调用都是这样的，创建目录除了给定的权限还要加上系统的Umask，Go也是如实遵循这种约定。
+	Umask是权限的补码,用于设置创建文件和文件夹默认权限的,一般在 /etc/profile中或 $HOME/profile或 $HOME/.bash_profile中
+	*/
+	mask := syscall.Umask(0)
+	defer syscall.Umask(mask)
+
+	dir, err := filepath.Abs(m.Path)
+	if nil != err {
+		logrus.Errorf("get absolute file path failed. \n%s.", err)
+		return
+	}
+	m.ProjectPath = fmt.Sprintf("%s/%s", dir, m.Name)
+
 	err = validator.New().Struct(m)
 	if nil != err {
 		logrus.Errorf("validate struct failed. \n%s.", err)
 		return
 	}
 
-	// make project directory
-	dir, err := filepath.Abs(m.Path)
-	if nil != err {
-		logrus.Errorf("get absolute file path failed. \n%s.", err)
-		return
-	}
-
-	projectDirectory := fmt.Sprintf("%s/%s", dir, m.Name)
-	if file.PathExists(projectDirectory) {
+	if file.PathExists(m.ProjectPath) {
 		err = errors.New("project directory has existed")
 		if nil != err {
 			return
 		}
 	}
 
+	mode := m.Mode
 	// project root
-	err = os.MkdirAll(projectDirectory, os.ModePerm)
+	err = os.MkdirAll(m.ProjectPath, mode)
 	if nil != err {
 		logrus.Errorf("make project directory failed. \n%s.", err)
 		return
 	}
 
-	// project handlers
-	err = os.MkdirAll(fmt.Sprintf("%s/handler", projectDirectory), os.ModePerm)
+	err = generateProjTemplate(m)
 	if nil != err {
-		logrus.Errorf("make project handler directory failed. \n%s.", err)
+		logrus.Errorf("generate proj template failed. \n%s.", err)
+		return
+	}
+
+	err = generateApiTemplate(m)
+	if nil != err {
+		logrus.Errorf("generate api template failed. \n%s.", err)
+		return
+	}
+
+	// constant
+	err = generateConstantTemplate(m)
+	if nil != err {
+		logrus.Errorf("generate constant template failed. \n%s.", err)
+		return
+	}
+
+	// handler
+	err = generateHandlerTemplate(m)
+	if nil != err {
+		logrus.Errorf("generate handler template failed. \n%s.", err)
 		return
 	}
 
 	//create main file
+	err = generateMainTemplate(m)
+	if nil != err {
+		logrus.Warnf("generate main template failed. \n%s.", err)
+		return
+	}
 
+	// do go imports
+	goimports.DoGoImports([]string{m.ProjectPath}, true)
 	return
 }

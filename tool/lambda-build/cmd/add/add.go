@@ -1,7 +1,6 @@
 package add
 
 import (
-	"github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add/api"
 	"github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add/func"
 	"github.com/spf13/cobra"
 )
@@ -12,13 +11,11 @@ func CommandAdd() *cobra.Command {
 		Use:   "add",
 		Short: "add component",
 		Example: `add func --name LambdaHandler --path ./
-add api --uri "/api/v1/share/app/video/get_share_info"
 		`,
 	}
 
 	addCmd.AddCommand(
 		_func.CommandAddLambdaFunction(),
-		api.CommandAddApi(),
 	)
 	return addCmd
 }

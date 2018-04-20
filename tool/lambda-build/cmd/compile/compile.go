@@ -10,7 +10,7 @@ func CommandCompile() *cobra.Command {
 		Use:   "compile",
 		Short: "compile lambda project",
 		Run: func(cmd *cobra.Command, args []string) {
-			Api{}.Run()
+
 		},
 	}
 
