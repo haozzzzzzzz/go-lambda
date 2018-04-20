@@ -25,7 +25,6 @@ func CommandAddApiFunction() *cobra.Command {
 			}
 
 			apiItem.ApiHandlerPackage = snaker.CamelToSnake(filepath.Base(path))
-			fmt.Println(apiItem.ApiHandlerPackage)
 			apiItem.SourceFile = fmt.Sprintf("%s/api_%s.go", path, strings.ToLower(apiItem.ApiHandlerFunc))
 			err = validator.New().Struct(apiItem)
 			if nil != err {
