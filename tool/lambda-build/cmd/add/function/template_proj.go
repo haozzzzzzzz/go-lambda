@@ -43,5 +43,15 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 		return
 	}
 
+	// check aws file
+	awsYamlFile := &proj.AWSYamlFile{
+		Mode: lambdaFunc.Mode,
+	}
+	_, err = awsYamlFile.CheckAWSYamlFile(lambdaFunc.ProjectPath, false)
+	if nil != err {
+		logrus.Errorf("check aws yaml file failed. \n%s.", err)
+		return
+	}
+
 	return
 }
