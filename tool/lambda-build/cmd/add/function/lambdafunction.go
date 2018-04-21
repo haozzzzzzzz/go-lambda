@@ -35,7 +35,7 @@ func CommandAddLambdaFunction() *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&handler.Name, "name", "n", "", "set lambda project name")
-	flags.StringVarP(&handler.Path, "path", "p", "", "set lambda project path")
+	flags.StringVarP(&handler.Path, "path", "p", "./", "set lambda project path")
 	flags.StringVarP(&eventType, "event", "e", BasicExecutionEvent.String(), "set lambda function event source type")
 
 	return cmd
