@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/sirupsen/logrus"
@@ -20,7 +21,16 @@ type AWSYamlFile struct {
 }
 
 func (m *AWSYamlFile) Save(projectPath string) (err error) {
-	awsYamlFilePath := fmt.Sprintf("%s/.proj/secret/aws.yaml", projectPath)
+	awsYamlFileDir := fmt.Sprintf("%s/.proj/secret", projectPath)
+	if !file.PathExists(awsYamlFileDir) {
+		err = os.MkdirAll(awsYamlFileDir, m.Mode)
+		if nil != err {
+			logrus.Errorf("make project secret directory failed. \n%s.", err)
+			return
+		}
+	}
+
+	awsYamlFilePath := fmt.Sprintf("%s/aws.yaml", awsYamlFileDir)
 	byteYaml, err := yaml.Marshal(m)
 	if nil != err {
 		logrus.Errorf("marshal aws yaml failed. \n%s.", err)
@@ -37,7 +47,7 @@ func (m *AWSYamlFile) Save(projectPath string) (err error) {
 }
 
 func LoadAWSYamlFile(projectPath string) (yamlFile *AWSYamlFile, err error) {
-	awsYamlFilePath := fmt.Sprintf("%s/secret/aws.yaml")
+	awsYamlFilePath := fmt.Sprintf("%s/.proj/secret/aws.yaml", projectPath)
 	byteYaml, err := ioutil.ReadFile(awsYamlFilePath)
 	if nil != err {
 		logrus.Errorf("read aws yaml file failed. \n%s.", err)
@@ -54,43 +64,67 @@ func LoadAWSYamlFile(projectPath string) (yamlFile *AWSYamlFile, err error) {
 	return
 }
 
-func (m *AWSYamlFile) CheckAWSYamlFile(projectPath string, overWrite bool) (exist bool, err error) {
-	awsYamlFilePath := fmt.Sprintf("%s/secret/aws.yaml")
-	if file.PathExists(awsYamlFilePath) && !overWrite {
+func (m *AWSYamlFile) CheckAWSYamlFile(projectPath string) (exist bool, err error) {
+	awsYamlFilePath := fmt.Sprintf("%s/.proj/secret/aws.yaml", projectPath)
+	var awsYamlFile *AWSYamlFile
+	if file.PathExists(awsYamlFilePath) {
 		exist = true
-		return
+		awsYamlFile, err = LoadAWSYamlFile(projectPath)
+		if nil != err {
+			logrus.Errorf("load asw yaml file failed. \n%s.", err)
+			return
+		}
+
+	} else {
+		awsYamlFile = &AWSYamlFile{
+			Mode: m.Mode,
+		}
 	}
 
-	awsYamlFile := AWSYamlFile{
-		Mode: m.Mode,
-	}
 	inputReader := bufio.NewReader(os.Stdin)
-	fmt.Print("Input AWS access key:")
-	awsYamlFile.AccessKey, err = inputReader.ReadString('\n')
+	var input string
+	fmt.Print(fmt.Sprintf("Input AWS access key (%s):", awsYamlFile.AccessKey))
+	input, err = inputReader.ReadString('\n')
 	if nil != err {
 		logrus.Errorf("read AWS access key failed. \n%s.", err)
 		return
 	}
+	input = strings.Replace(input, "\n", "", -1)
+	if input != "" {
+		awsYamlFile.AccessKey = input
+	}
 
-	fmt.Print("Input AWS secret key:")
-	awsYamlFile.SecretKey, err = inputReader.ReadString('\n')
+	fmt.Print(fmt.Sprintf("Input AWS secret key (%s):", awsYamlFile.SecretKey))
+	input, err = inputReader.ReadString('\n')
 	if nil != err {
 		logrus.Errorf("read AWS secret key failed. \n%s.", err)
 		return
 	}
+	input = strings.Replace(input, "\n", "", -1)
+	if input != "" {
+		awsYamlFile.SecretKey = input
+	}
 
-	fmt.Print("Input AWS region(e.g. us-east-1):")
-	awsYamlFile.Region, err = inputReader.ReadString('\n')
+	fmt.Print(fmt.Sprintf("Input AWS region (%s):", awsYamlFile.Region))
+	input, err = inputReader.ReadString('\n')
 	if nil != err {
 		logrus.Errorf("read AWS region failed. \n%s.", err)
 		return
 	}
+	input = strings.Replace(input, "\n", "", -1)
+	if input != "" {
+		awsYamlFile.Region = input
+	}
 
-	fmt.Print("Input AWS output format(e.g. json):")
-	awsYamlFile.OutputFormat, err = inputReader.ReadString('\n')
+	fmt.Print(fmt.Sprintf("Input AWS output format (%s):", awsYamlFile.OutputFormat))
+	input, err = inputReader.ReadString('\n')
 	if nil != err {
 		logrus.Errorf("read AWS output format failed. \n%s.", err)
 		return
+	}
+	input = strings.Replace(input, "\n", "", -1)
+	if input != "" {
+		awsYamlFile.OutputFormat = input
 	}
 
 	err = awsYamlFile.Save(projectPath)

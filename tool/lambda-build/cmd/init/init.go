@@ -1,18 +1,19 @@
-package api
+package init
 
 import (
+	"os"
 	"path/filepath"
 
-	"github.com/haozzzzzzzz/go-rapid-development/web/ginbuilder/api"
+	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-func CommandCompileApi() *cobra.Command {
+func CommandInit() *cobra.Command {
 	var projectPath string
 	var cmd = &cobra.Command{
-		Use:   "api",
-		Short: "compile api",
+		Use:   "init",
+		Short: "init lambda function project",
 		Run: func(cmd *cobra.Command, args []string) {
 			if projectPath == "" {
 				logrus.Errorf("need path")
@@ -26,9 +27,12 @@ func CommandCompileApi() *cobra.Command {
 				return
 			}
 
-			err = api.NewApiParser(projectPath).MapApi()
+			awsYamlFile := proj.AWSYamlFile{
+				Mode: os.ModePerm,
+			}
+			_, err = awsYamlFile.CheckAWSYamlFile(projectPath)
 			if nil != err {
-				logrus.Errorf("mapping api failed. \n%s.", err)
+				logrus.Errorf("check yaml file failed. \n%s.", err)
 				return
 			}
 		},

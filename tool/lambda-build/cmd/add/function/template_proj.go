@@ -18,7 +18,8 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 	}
 
 	// create secret folder
-	err = os.MkdirAll(fmt.Sprintf("%s/secret", projDir), lambdaFunc.Mode)
+	secretDir := fmt.Sprintf("%s/secret", projDir)
+	err = os.MkdirAll(secretDir, lambdaFunc.Mode)
 	if nil != err {
 		logrus.Errorf("make project secret folder failed. \n%s.", err)
 		return
@@ -47,7 +48,7 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 	awsYamlFile := &proj.AWSYamlFile{
 		Mode: lambdaFunc.Mode,
 	}
-	_, err = awsYamlFile.CheckAWSYamlFile(lambdaFunc.ProjectPath, false)
+	_, err = awsYamlFile.CheckAWSYamlFile(lambdaFunc.ProjectPath)
 	if nil != err {
 		logrus.Errorf("check aws yaml file failed. \n%s.", err)
 		return
