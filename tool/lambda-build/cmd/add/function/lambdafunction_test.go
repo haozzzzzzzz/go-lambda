@@ -8,7 +8,7 @@ import (
 func TestLambdaFunction_Run(t *testing.T) {
 	lambdaFunc := LambdaFunction{
 		Name: "LambdaHandler",
-		Path: "/Users/hao/Documents/Projects/Github/go_lambda_learning/src/github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add/func",
+		Path: "/Users/hao/Documents/Projects/Github/go_lambda_learning/src/github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add/function",
 		Mode: os.ModePerm,
 	}
 	err := lambdaFunc.Run()
