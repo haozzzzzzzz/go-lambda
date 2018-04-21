@@ -2,7 +2,7 @@ package add
 
 import (
 	"github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add/api"
-	"github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add/func"
+	"github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add/function"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +16,7 @@ func CommandAdd() *cobra.Command {
 	}
 
 	addCmd.AddCommand(
-		_func.CommandAddLambdaFunction(),
+		function.CommandAddLambdaFunction(),
 		api.CommandAddApiFunction(),
 	)
 	return addCmd

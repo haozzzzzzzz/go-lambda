@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func CommandCompileApiFunction() *cobra.Command {
+func CommandCompileApi() *cobra.Command {
 	var projectPath string
 	var cmd = &cobra.Command{
 		Use:   "api",

@@ -1,13 +1,11 @@
-package _func
+package function
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 )
 
 func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
@@ -19,19 +17,14 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 	}
 
 	// create project yaml
-	projYamlFileName := fmt.Sprintf("%s/proj.yaml", projDir)
 	projYamlConfig := proj.ProjectYamlFile{
 		Name:        lambdaFunc.Name,
 		ProjectPath: lambdaFunc.ProjectPath,
+		Mode:        lambdaFunc.Mode,
 	}
-	byteProjYamlFile, err := yaml.Marshal(projYamlConfig)
+	err = projYamlConfig.Save()
 	if nil != err {
-		logrus.Errorf("marshal proj yaml config file failed. \n%s.", err)
-		return
-	}
-	err = ioutil.WriteFile(projYamlFileName, byteProjYamlFile, lambdaFunc.Mode)
-	if nil != err {
-		logrus.Warnf("write .proj/proj.yaml failed. \n%s.", err)
+		logrus.Errorf("save project config failed. \n%s.", err)
 		return
 	}
 
