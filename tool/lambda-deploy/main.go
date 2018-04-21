@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
-import (
-	"github.com/haozzzzzzzz/go-lambda/tool/lambda-build/cmd/add"
-)
+import "github.com/haozzzzzzzz/go-lambda/tool/lambda-deploy/cmd"
 
-func init() {
-	addCmd := add.CommandAdd()
-	rootCmd.AddCommand(addCmd)
+func main() {
+	cmd.Execute()
 }
