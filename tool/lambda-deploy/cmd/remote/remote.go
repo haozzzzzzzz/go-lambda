@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func CommandRomote() *cobra.Command {
+func CommandRemote() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:     "remote",
 		Short:   "remote command",

@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(remote.CommandRomote())
+	rootCmd.AddCommand(remote.CommandRemote())
 }
