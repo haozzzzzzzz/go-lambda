@@ -18,10 +18,13 @@ import (
 func CommandAddLambdaFunction() *cobra.Command {
 	var handler LambdaFunction
 	handler.Mode = os.ModePerm
+	var eventType string
 	var cmd = &cobra.Command{
 		Use:   "func",
 		Short: "add lambda function",
 		Run: func(cmd *cobra.Command, args []string) {
+			handler.EventSourceType = NewLambdaFunctionEventSourceType(eventType)
+
 			err := handler.Run()
 			if nil != err {
 				logrus.Errorf("run add lambda function command failed. \n%s.", err)
@@ -33,16 +36,54 @@ func CommandAddLambdaFunction() *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVarP(&handler.Name, "name", "n", "", "set lambda project name")
 	flags.StringVarP(&handler.Path, "path", "p", "", "set lambda project path")
+	flags.StringVarP(&eventType, "event", "e", BasicExecutionEvent.String(), "set lambda function event source type")
 
 	return cmd
 }
 
+// Lambda函数事件源
+type LambdaFunctionEventSourceType int8
+
+const (
+	BasicExecutionEvent LambdaFunctionEventSourceType = 0 // 基本执行
+	CustomEvent         LambdaFunctionEventSourceType = 1 // 自定义事件
+	ApiGatewayEvent     LambdaFunctionEventSourceType = 2 // API GATEWAY事件
+)
+
+func NewLambdaFunctionEventSourceType(strEvent string) LambdaFunctionEventSourceType {
+	switch strEvent {
+	case CustomEvent.String():
+		return CustomEvent
+	case ApiGatewayEvent.String():
+		return ApiGatewayEvent
+	case BasicExecutionEvent.String():
+		return BasicExecutionEvent
+	}
+	return BasicExecutionEvent
+}
+
+func (m LambdaFunctionEventSourceType) String() string {
+	switch m {
+	case CustomEvent:
+		return "CustomEvent"
+	case ApiGatewayEvent:
+		return "ApiGatewayEvent"
+	case BasicExecutionEvent:
+		fallthrough
+	default:
+		return "BasicExecutionEvent"
+	}
+
+	return ""
+}
+
 // 添加Lambda函数命令处理器
 type LambdaFunction struct {
-	Name        string      `json:"name" validate:"required"`
-	Path        string      `json:"path" validate:"required"`
-	Mode        os.FileMode `json:"mode" validate:"required"`
-	ProjectPath string      `json:"project_path"`
+	Name            string      `json:"name" validate:"required"`
+	Path            string      `json:"path" validate:"required"`
+	Mode            os.FileMode `json:"mode" validate:"required"`
+	ProjectPath     string      `json:"project_path"`
+	EventSourceType LambdaFunctionEventSourceType
 }
 
 func (m *LambdaFunction) Run() (err error) {
@@ -87,12 +128,6 @@ func (m *LambdaFunction) Run() (err error) {
 		return
 	}
 
-	err = generateApiTemplate(m)
-	if nil != err {
-		logrus.Errorf("generate api template failed. \n%s.", err)
-		return
-	}
-
 	// constant
 	err = generateConstantTemplate(m)
 	if nil != err {
@@ -105,6 +140,17 @@ func (m *LambdaFunction) Run() (err error) {
 	if nil != err {
 		logrus.Errorf("generate handler template failed. \n%s.", err)
 		return
+	}
+
+	switch m.EventSourceType {
+	case BasicExecutionEvent:
+	case CustomEvent:
+	case ApiGatewayEvent:
+		err = generateApiTemplate(m)
+		if nil != err {
+			logrus.Errorf("generate api template failed. \n%s.", err)
+			return
+		}
 	}
 
 	//create main file
