@@ -1,0 +1,5 @@
+package dynamodb
+
+func init() {
+
+}

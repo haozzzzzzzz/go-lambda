@@ -12,6 +12,7 @@ import (
 // project yaml 文件
 type ProjectYamlFile struct {
 	Name        string      `json:"name" yaml:"name"`
+	Description string      `yaml:"description"`
 	ProjectPath string      `json:"project_path" yaml:"project_path"`
 	Mode        os.FileMode `json:"mode" yaml:"mode"`
 }

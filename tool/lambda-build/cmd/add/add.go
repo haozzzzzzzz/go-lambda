@@ -9,10 +9,9 @@ import (
 func CommandAdd() *cobra.Command {
 	// addCmd represents the add command
 	var addCmd = &cobra.Command{
-		Use:   "add",
-		Short: "add component",
-		Example: `add func --name LambdaHandler --path ./
-		`,
+		Use:     "add",
+		Short:   "add component",
+		Example: `add func --name LambdaHandler --path ./`,
 	}
 
 	addCmd.AddCommand(

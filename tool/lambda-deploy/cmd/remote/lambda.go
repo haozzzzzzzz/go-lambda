@@ -1,6 +1,7 @@
 package remote
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
@@ -26,6 +27,15 @@ func CommandRemoteLambda() *cobra.Command {
 				return
 			}
 
+			remoteLambdaFunc := &RemoteLambdaFunction{
+				ProjectPath: projectPath,
+				Mode:        os.ModePerm,
+			}
+			err = remoteLambdaFunc.Run()
+			if nil != err {
+				logrus.Errorf("run remote lambda function failed. \n%s.", err)
+				return
+			}
 		},
 	}
 
@@ -33,4 +43,13 @@ func CommandRemoteLambda() *cobra.Command {
 	flags.StringVarP(&projectPath, "path", "p", "./", "project path")
 
 	return cmd
+}
+
+type RemoteLambdaFunction struct {
+	ProjectPath string      `yaml:"project_path"`
+	Mode        os.FileMode `yaml:"mode"`
+}
+
+func (m *RemoteLambdaFunction) Run() (err error) {
+	return
 }

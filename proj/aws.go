@@ -17,6 +17,7 @@ type AWSYamlFile struct {
 	SecretKey    string      `yaml:"secret_key"`
 	Region       string      `yaml:"region"`
 	OutputFormat string      `yaml:"output_format"`
+	Role         string      `yaml:"role"`
 	Mode         os.FileMode `yaml:"mode"`
 }
 
@@ -64,9 +65,8 @@ func LoadAWSYamlFile(projectPath string) (yamlFile *AWSYamlFile, err error) {
 	return
 }
 
-func (m *AWSYamlFile) CheckAWSYamlFile(projectPath string) (exist bool, err error) {
+func CheckAWSYamlFile(projectPath string, mode os.FileMode, overwrite bool) (awsYamlFile *AWSYamlFile, exist bool, err error) {
 	awsYamlFilePath := fmt.Sprintf("%s/.proj/secret/aws.yaml", projectPath)
-	var awsYamlFile *AWSYamlFile
 	if file.PathExists(awsYamlFilePath) {
 		exist = true
 		awsYamlFile, err = LoadAWSYamlFile(projectPath)
@@ -75,9 +75,14 @@ func (m *AWSYamlFile) CheckAWSYamlFile(projectPath string) (exist bool, err erro
 			return
 		}
 
+		// 如果不重新配置，则返回
+		if !overwrite {
+			return
+		}
+
 	} else {
 		awsYamlFile = &AWSYamlFile{
-			Mode: m.Mode,
+			Mode: mode,
 		}
 	}
 
@@ -125,6 +130,17 @@ func (m *AWSYamlFile) CheckAWSYamlFile(projectPath string) (exist bool, err erro
 	input = strings.Replace(input, "\n", "", -1)
 	if input != "" {
 		awsYamlFile.OutputFormat = input
+	}
+
+	fmt.Print(fmt.Sprintf("Input Lambda Execution Role(%s):", awsYamlFile.Role))
+	input, err = inputReader.ReadString('\n')
+	if nil != err {
+		logrus.Errorf("read lambda execution role failed. \n%s.", err)
+		return
+	}
+	input = strings.Replace(input, "\n", "", -1)
+	if input != "" {
+		awsYamlFile.Role = input
 	}
 
 	err = awsYamlFile.Save(projectPath)

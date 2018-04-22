@@ -35,6 +35,7 @@ func CommandAddLambdaFunction() *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&handler.Name, "name", "n", "", "set lambda project name")
+	flags.StringVarP(&handler.Description, "description", "d", "AWS Serverless Function", "lambda function description")
 	flags.StringVarP(&handler.Path, "path", "p", "./", "set lambda project path")
 	flags.StringVarP(&eventType, "event", "e", BasicExecutionEvent.String(), "set lambda function event source type")
 
@@ -80,6 +81,7 @@ func (m LambdaFunctionEventSourceType) String() string {
 // 添加Lambda函数命令处理器
 type LambdaFunction struct {
 	Name            string      `json:"name" validate:"required"`
+	Description     string      `yaml:"description"`
 	Path            string      `json:"path" validate:"required"`
 	Mode            os.FileMode `json:"mode" validate:"required"`
 	ProjectPath     string      `json:"project_path"`
@@ -125,6 +127,13 @@ func (m *LambdaFunction) Run() (err error) {
 	err = generateProjTemplate(m)
 	if nil != err {
 		logrus.Errorf("generate proj template failed. \n%s.", err)
+		return
+	}
+
+	// config
+	err = generateConfigTemplate(m)
+	if nil != err {
+		logrus.Errorf("generate config template failed. \n%s.", err)
 		return
 	}
 

@@ -42,6 +42,8 @@ func CommandCompileFunction() *cobra.Command {
 type CompileFunction struct {
 	ProjectPath     string `json:"project_path" yaml:"project_path" validate:"required"`
 	ProjectYamlFile *proj.ProjectYamlFile
+	AWSYamlFile     *proj.AWSYamlFile
+	SAMYamlFile     *proj.SAMTemplateYamlFile
 }
 
 func (m *CompileFunction) Run() (err error) {
@@ -51,9 +53,17 @@ func (m *CompileFunction) Run() (err error) {
 		return
 	}
 
+	// read project yaml file
 	m.ProjectYamlFile, err = proj.LoadProjectYamlFile(m.ProjectPath)
 	if nil != err {
 		logrus.Errorf("load project yaml file failed. \n%s.", err)
+		return
+	}
+
+	// read AWS yaml file
+	m.AWSYamlFile, _, err = proj.CheckAWSYamlFile(m.ProjectPath, m.ProjectYamlFile.Mode, false)
+	if nil != err {
+		logrus.Errorf("check aws yaml file failed. \n%s.", err)
 		return
 	}
 
@@ -63,6 +73,33 @@ func (m *CompileFunction) Run() (err error) {
 		logrus.Errorf("run go build failed. \n%s.", err)
 		return
 	}
+
+	// save sam template file
+	m.SAMYamlFile = proj.NewSAMTemplateYamlFileByExistConfig(m.ProjectYamlFile, m.AWSYamlFile)
+	if nil != err {
+		logrus.Errorf("new sam template yaml obj failed. \n%s.", err)
+		return
+	}
+	err = m.SAMYamlFile.Save(m.ProjectPath, m.ProjectYamlFile.Mode)
+	if nil != err {
+		logrus.Errorf("save sam template failed. \n%s.", err)
+		return
+	}
+
+	// zip package
+	err = m.zipPackage()
+	if nil != err {
+		logrus.Errorf("zip package failed. \n%s.", err)
+		return
+	}
+
+	// generate
+	err = m.generateSAMTemplate()
+	if nil != err {
+		logrus.Errorf("generate sam template failed. \n%s.", err)
+		return
+	}
+
 	return
 }
 
@@ -84,19 +121,35 @@ func (m *CompileFunction) runGoBuild() (err error) {
 		logrus.Info(strOutput)
 	}
 
+	return
+}
+
+func (m *CompileFunction) zipPackage() (err error) {
+	projConfig := m.ProjectYamlFile
+	binTarget := fmt.Sprintf("%s/bin/%s", projConfig.ProjectPath, projConfig.Name)
+
+	configDir := fmt.Sprintf("%s/config", projConfig.ProjectPath)
+
 	// zip
 	logrus.Info("zip building zip file")
 	zipTarget := fmt.Sprintf("%s/bin/%s.zip", projConfig.ProjectPath, projConfig.Name)
-	exit, output, err = cmd.RunCommand("zip", zipTarget, binTarget)
+
+	// 打包可执行文件和配置文件
+	exit, output, err := cmd.RunCommand("zip", zipTarget, binTarget, configDir)
 	if nil != err || exit != 0 {
 		logrus.Errorf("run zip command failed. \n%s.", err)
 		return
 	}
 
-	strOutput = output.String()
+	strOutput := output.String()
 	if strOutput != "" {
 		logrus.Info(strOutput)
 	}
+
+	return
+}
+
+func (m *CompileFunction) generateSAMTemplate() (err error) {
 
 	return
 }

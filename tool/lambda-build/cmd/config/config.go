@@ -1,4 +1,4 @@
-package init
+package config
 
 import (
 	"os"
@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func CommandInit() *cobra.Command {
+func CommandConfig() *cobra.Command {
 	var projectPath string
 	var cmd = &cobra.Command{
-		Use:   "init",
-		Short: "init lambda function project",
+		Use:   "config",
+		Short: "config lambda function project",
 		Run: func(cmd *cobra.Command, args []string) {
 			if projectPath == "" {
 				logrus.Errorf("need path")
@@ -27,10 +27,7 @@ func CommandInit() *cobra.Command {
 				return
 			}
 
-			awsYamlFile := proj.AWSYamlFile{
-				Mode: os.ModePerm,
-			}
-			_, err = awsYamlFile.CheckAWSYamlFile(projectPath)
+			_, _, err = proj.CheckAWSYamlFile(projectPath, os.ModePerm, true)
 			if nil != err {
 				logrus.Errorf("check yaml file failed. \n%s.", err)
 				return
