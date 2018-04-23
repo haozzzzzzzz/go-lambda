@@ -34,10 +34,11 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 
 	// create project yaml
 	projYamlConfig := proj.ProjectYamlFile{
-		Name:        lambdaFunc.Name,
-		Description: lambdaFunc.Description,
-		ProjectPath: lambdaFunc.ProjectPath,
-		Mode:        lambdaFunc.Mode,
+		Name:            lambdaFunc.Name,
+		Description:     lambdaFunc.Description,
+		ProjectPath:     lambdaFunc.ProjectPath,
+		EventSourceType: lambdaFunc.EventSourceType,
+		Mode:            lambdaFunc.Mode,
 	}
 	err = projYamlConfig.Save()
 	if nil != err {

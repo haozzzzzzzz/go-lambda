@@ -72,9 +72,9 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 
 	// 创建一个s3的bucket用于存放代码包
 	packageBucket := fmt.Sprintf("lambda-%s", snaker.CamelToSnake(projectConfig.Name))
+	packageBucket = strings.Replace(packageBucket, "_", "-", -1)
 	logrus.Infof("checking s3 bucket %q", packageBucket)
 
-	packageBucket = strings.Replace(packageBucket, "_", "-", -1)
 	_, err = awsYamlFile.RunAWSCliCommand(
 		"aws",
 		"s3", "mb", fmt.Sprintf("s3://%s", packageBucket),

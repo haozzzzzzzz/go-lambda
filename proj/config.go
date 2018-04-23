@@ -9,12 +9,49 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Lambda函数事件源
+type LambdaFunctionEventSourceType int8
+
+const (
+	BasicExecutionEvent LambdaFunctionEventSourceType = 0 // 基本执行
+	CustomEvent         LambdaFunctionEventSourceType = 1 // 自定义事件
+	ApiGatewayEvent     LambdaFunctionEventSourceType = 2 // API GATEWAY事件
+)
+
+func NewLambdaFunctionEventSourceType(strEvent string) LambdaFunctionEventSourceType {
+	switch strEvent {
+	case CustomEvent.String():
+		return CustomEvent
+	case ApiGatewayEvent.String():
+		return ApiGatewayEvent
+	case BasicExecutionEvent.String():
+		return BasicExecutionEvent
+	}
+	return BasicExecutionEvent
+}
+
+func (m LambdaFunctionEventSourceType) String() string {
+	switch m {
+	case CustomEvent:
+		return "CustomEvent"
+	case ApiGatewayEvent:
+		return "ApiGatewayEvent"
+	case BasicExecutionEvent:
+		fallthrough
+	default:
+		return "BasicExecutionEvent"
+	}
+
+	return ""
+}
+
 // project yaml 文件
 type ProjectYamlFile struct {
-	Name        string      `json:"name" yaml:"name"`
-	Description string      `yaml:"description"`
-	ProjectPath string      `json:"project_path" yaml:"project_path"`
-	Mode        os.FileMode `json:"mode" yaml:"mode"`
+	Name            string                        `json:"name" yaml:"name"`
+	Description     string                        `yaml:"description"`
+	ProjectPath     string                        `json:"project_path" yaml:"project_path"`
+	EventSourceType LambdaFunctionEventSourceType `yaml:"event_source_type"`
+	Mode            os.FileMode                   `json:"mode" yaml:"mode"`
 }
 
 func (m *ProjectYamlFile) Save() (err error) {

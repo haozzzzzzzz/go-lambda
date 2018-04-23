@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/go-playground/validator"
+	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/haozzzzzzzz/go-rapid-development/tools/goimports"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/sirupsen/logrus"
@@ -23,7 +24,7 @@ func CommandAddLambdaFunction() *cobra.Command {
 		Use:   "func",
 		Short: "add lambda function",
 		Run: func(cmd *cobra.Command, args []string) {
-			handler.EventSourceType = NewLambdaFunctionEventSourceType(eventType)
+			handler.EventSourceType = proj.NewLambdaFunctionEventSourceType(eventType)
 
 			err := handler.Run()
 			if nil != err {
@@ -37,45 +38,9 @@ func CommandAddLambdaFunction() *cobra.Command {
 	flags.StringVarP(&handler.Name, "name", "n", "", "set lambda project name")
 	flags.StringVarP(&handler.Description, "description", "d", "AWS Serverless Function", "lambda function description")
 	flags.StringVarP(&handler.Path, "path", "p", "./", "set lambda project path")
-	flags.StringVarP(&eventType, "event", "e", BasicExecutionEvent.String(), "set lambda function event source type")
+	flags.StringVarP(&eventType, "event", "e", proj.BasicExecutionEvent.String(), "set lambda function event source type")
 
 	return cmd
-}
-
-// Lambda函数事件源
-type LambdaFunctionEventSourceType int8
-
-const (
-	BasicExecutionEvent LambdaFunctionEventSourceType = 0 // 基本执行
-	CustomEvent         LambdaFunctionEventSourceType = 1 // 自定义事件
-	ApiGatewayEvent     LambdaFunctionEventSourceType = 2 // API GATEWAY事件
-)
-
-func NewLambdaFunctionEventSourceType(strEvent string) LambdaFunctionEventSourceType {
-	switch strEvent {
-	case CustomEvent.String():
-		return CustomEvent
-	case ApiGatewayEvent.String():
-		return ApiGatewayEvent
-	case BasicExecutionEvent.String():
-		return BasicExecutionEvent
-	}
-	return BasicExecutionEvent
-}
-
-func (m LambdaFunctionEventSourceType) String() string {
-	switch m {
-	case CustomEvent:
-		return "CustomEvent"
-	case ApiGatewayEvent:
-		return "ApiGatewayEvent"
-	case BasicExecutionEvent:
-		fallthrough
-	default:
-		return "BasicExecutionEvent"
-	}
-
-	return ""
 }
 
 // 添加Lambda函数命令处理器
@@ -85,7 +50,7 @@ type LambdaFunction struct {
 	Path            string      `json:"path" validate:"required"`
 	Mode            os.FileMode `json:"mode" validate:"required"`
 	ProjectPath     string      `json:"project_path"`
-	EventSourceType LambdaFunctionEventSourceType
+	EventSourceType proj.LambdaFunctionEventSourceType
 }
 
 func (m *LambdaFunction) Run() (err error) {
@@ -152,9 +117,9 @@ func (m *LambdaFunction) Run() (err error) {
 	}
 
 	switch m.EventSourceType {
-	case BasicExecutionEvent:
-	case CustomEvent:
-	case ApiGatewayEvent:
+	case proj.BasicExecutionEvent:
+	case proj.CustomEvent:
+	case proj.ApiGatewayEvent:
 		err = generateApiTemplate(m)
 		if nil != err {
 			logrus.Errorf("generate api template failed. \n%s.", err)

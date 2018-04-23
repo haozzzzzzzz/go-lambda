@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,11 +14,11 @@ func generateMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 
 	var handlerName string
 	switch lambdaFunc.EventSourceType {
-	case BasicExecutionEvent:
+	case proj.BasicExecutionEvent:
 		handlerName = "BasicExecutionEventHandler"
-	case CustomEvent:
+	case proj.CustomEvent:
 		handlerName = "CustomEventHandler"
-	case ApiGatewayEvent:
+	case proj.ApiGatewayEvent:
 		handlerName = "ApiGatewayEventHandler"
 	}
 
@@ -59,7 +60,7 @@ func createDeployShellFile(lambdaFunc *LambdaFunction) (err error) {
 	var deployShellFileText string
 
 	switch lambdaFunc.EventSourceType {
-	case ApiGatewayEvent:
+	case proj.ApiGatewayEvent:
 		deployShellFileText = `#!/usr/bin/env bash
 echo generating api
 lamb compile api

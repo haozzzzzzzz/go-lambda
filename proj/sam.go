@@ -70,6 +70,20 @@ func NewSAMTemplateYamlFileByExistConfig(projConfig *ProjectYamlFile, awsConfig 
 		},
 	}
 
+	switch projConfig.EventSourceType {
+	case ApiGatewayEvent:
+		lambdaFunctionEvents := make(map[string]interface{})
+		resourceLambdaFunction.Properties["Events"] = lambdaFunctionEvents
+		lambdaFunctionEvents[projConfig.Name] = map[string]interface{}{
+			"Type": "Api",
+			"Properties": map[string]interface{}{
+				"Path":   "/{proxy+}",
+				"Method": "any",
+			},
+		}
+
+	}
+
 	templateFile.Resources[projConfig.Name] = resourceLambdaFunction
 
 	return
