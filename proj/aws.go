@@ -7,12 +7,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/haozzzzzzzz/go-rapid-development/cmd"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
 type AWSYamlFile struct {
+	AccountId    string      `yaml:"account_id"`
 	AccessKey    string      `yaml:"access_key"`
 	SecretKey    string      `yaml:"secret_key"`
 	Region       string      `yaml:"region"`
@@ -88,6 +90,18 @@ func CheckAWSYamlFile(projectPath string, mode os.FileMode, overwrite bool) (aws
 
 	inputReader := bufio.NewReader(os.Stdin)
 	var input string
+
+	fmt.Print(fmt.Sprintf("Input AWS account id (%s):", awsYamlFile.AccountId))
+	input, err = inputReader.ReadString('\n')
+	if nil != err {
+		logrus.Errorf("read AWS account id failed. \n%s.", err)
+		return
+	}
+	input = strings.Replace(input, "\n", "", -1)
+	if input != "" {
+		awsYamlFile.AccountId = input
+	}
+
 	fmt.Print(fmt.Sprintf("Input AWS access key (%s):", awsYamlFile.AccessKey))
 	input, err = inputReader.ReadString('\n')
 	if nil != err {
@@ -150,4 +164,12 @@ func CheckAWSYamlFile(projectPath string, mode os.FileMode, overwrite bool) (aws
 	}
 
 	return
+}
+
+func (m *AWSYamlFile) RunAWSCliCommand(command string, args ...string) (exit int, err error) {
+	os.Setenv("AWS_ACCESS_KEY_ID", m.AccessKey)
+	os.Setenv("AWS_SECRET_ACCESS_KEY", m.SecretKey)
+	os.Setenv("AWS_DEFAULT_REGION", m.Region)
+	os.Setenv("AWS_DEFAULT_OUTPUT", m.OutputFormat)
+	return cmd.RunCommand(command, args...)
 }

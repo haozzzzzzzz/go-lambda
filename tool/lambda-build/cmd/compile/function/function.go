@@ -2,6 +2,7 @@ package function
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/go-playground/validator"
@@ -93,32 +94,22 @@ func (m *CompileFunction) Run() (err error) {
 		return
 	}
 
-	// generate
-	err = m.generateSAMTemplate()
-	if nil != err {
-		logrus.Errorf("generate sam template failed. \n%s.", err)
-		return
-	}
-
 	return
 }
 
 func (m *CompileFunction) runGoBuild() (err error) {
 	projConfig := m.ProjectYamlFile
-	binTarget := fmt.Sprintf("%s/bin/%s", projConfig.ProjectPath, projConfig.Name)
+	deployTarget := fmt.Sprintf("%s/deploy/%s", projConfig.ProjectPath, projConfig.Name)
 	mainFile := fmt.Sprintf("%s/main.go", projConfig.ProjectPath)
 
 	// go build
 	logrus.Info("go building binary")
-	exit, output, err := cmd.RunCommand("go", "build", "-v", "-o", binTarget, mainFile)
+	os.Setenv("GOOS", "linux")
+	os.Setenv("GOARCH", "amd64")
+	exit, err := cmd.RunCommand("go", "build", "-v", "-o", deployTarget, mainFile)
 	if nil != err || exit != 0 {
 		logrus.Errorf("run go build command failed. \n%s.", err)
 		return
-	}
-
-	strOutput := output.String()
-	if strOutput != "" {
-		logrus.Info(strOutput)
 	}
 
 	return
@@ -126,30 +117,19 @@ func (m *CompileFunction) runGoBuild() (err error) {
 
 func (m *CompileFunction) zipPackage() (err error) {
 	projConfig := m.ProjectYamlFile
-	binTarget := fmt.Sprintf("%s/bin/%s", projConfig.ProjectPath, projConfig.Name)
+	deployTarget := fmt.Sprintf("%s/deploy/%s", projConfig.ProjectPath, projConfig.Name)
 
 	configDir := fmt.Sprintf("%s/config", projConfig.ProjectPath)
-
 	// zip
 	logrus.Info("zip building zip file")
-	zipTarget := fmt.Sprintf("%s/bin/%s.zip", projConfig.ProjectPath, projConfig.Name)
+	zipTarget := fmt.Sprintf("%s/deploy/%s.zip", projConfig.ProjectPath, projConfig.Name)
 
 	// 打包可执行文件和配置文件
-	exit, output, err := cmd.RunCommand("zip", zipTarget, binTarget, configDir)
+	exit, err := cmd.RunCommand("zip", "-j", zipTarget, deployTarget, configDir)
 	if nil != err || exit != 0 {
 		logrus.Errorf("run zip command failed. \n%s.", err)
 		return
 	}
-
-	strOutput := output.String()
-	if strOutput != "" {
-		logrus.Info(strOutput)
-	}
-
-	return
-}
-
-func (m *CompileFunction) generateSAMTemplate() (err error) {
 
 	return
 }

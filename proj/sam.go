@@ -54,7 +54,7 @@ func NewSAMTemplateYamlFileByExistConfig(projConfig *ProjectYamlFile, awsConfig 
 			"Runtime":      "go1.x",
 			"CodeUri":      fmt.Sprintf("./%s.zip", projConfig.Name),
 			"Description":  projConfig.Description,
-			"Role":         awsConfig.Role,
+			"Role":         fmt.Sprintf("arn:aws:iam::%s:role/%s", awsConfig.AccountId, awsConfig.Role),
 		},
 	}
 
@@ -64,7 +64,7 @@ func NewSAMTemplateYamlFileByExistConfig(projConfig *ProjectYamlFile, awsConfig 
 }
 
 func (m *SAMTemplateYamlFile) Save(projectPath string, mode os.FileMode) (err error) {
-	samYamlFilePath := fmt.Sprintf("%s/bin/template.yaml", projectPath)
+	samYamlFilePath := fmt.Sprintf("%s/deploy/template.yaml", projectPath)
 	byteYaml, err := yaml.Marshal(m)
 	if nil != err {
 		logrus.Errorf("marshal sam yaml file failed. \n%s.", err)
