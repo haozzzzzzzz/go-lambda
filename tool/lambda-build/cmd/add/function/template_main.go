@@ -30,13 +30,12 @@ func generateMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 		return
 	}
 
-	// deploy.sh
-	deployShellFilePath := fmt.Sprintf("%s/deploy.sh", projectPath)
-	err = ioutil.WriteFile(deployShellFilePath, []byte(deployShellFileText), mode)
+	err = createDeployShellFile(lambdaFunc)
 	if nil != err {
-		logrus.Errorf("write %q failed. \n%s.", deployShellFilePath, err)
+		logrus.Errorf("create deploy shell file failed. \n%s.", err)
 		return
 	}
+
 	return
 }
 
@@ -54,9 +53,39 @@ func main() {
 }
 `
 
-var deployShellFileText = `#!/usr/bin/env bash
+func createDeployShellFile(lambdaFunc *LambdaFunction) (err error) {
+	projectPath := lambdaFunc.ProjectPath
+	mode := lambdaFunc.Mode
+	var deployShellFileText string
+
+	switch lambdaFunc.EventSourceType {
+	case ApiGatewayEvent:
+		deployShellFileText = `#!/usr/bin/env bash
+echo generating api
+lamb compile api
+
 echo building...
 lamb compile func
 
 echo deploying...
 lamd remote func`
+
+	default:
+		deployShellFileText = `#!/usr/bin/env bash
+echo building...
+lamb compile func
+
+echo deploying...
+lamd remote func`
+
+	}
+
+	// deploy.sh
+	deployShellFilePath := fmt.Sprintf("%s/deploy.sh", projectPath)
+	err = ioutil.WriteFile(deployShellFilePath, []byte(deployShellFileText), mode)
+	if nil != err {
+		logrus.Errorf("write %q failed. \n%s.", deployShellFilePath, err)
+		return
+	}
+	return
+}
