@@ -107,6 +107,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 		"cloudformation", "deploy",
 		"--template-file", fmt.Sprintf("%s/deploy/serverless-output.yaml", projectPath),
 		"--stack-name", stackName,
+		"--capabilities", "CAPABILITY_IAM",
 	)
 	if nil != err {
 		logrus.Errorf("cloudformation deploy lambda function failed. \n%s.", err)

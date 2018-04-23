@@ -49,12 +49,24 @@ func NewSAMTemplateYamlFileByExistConfig(projConfig *ProjectYamlFile, awsConfig 
 	resourceLambdaFunction := SAMResource{
 		Type: "AWS::Serverless::Function",
 		Properties: map[string]interface{}{
-			"Handler":      projConfig.Name,
-			"FunctionName": projConfig.Name,
-			"Runtime":      "go1.x",
-			"CodeUri":      fmt.Sprintf("./%s.zip", projConfig.Name),
-			"Description":  projConfig.Description,
-			"Role":         fmt.Sprintf("arn:aws:iam::%s:role/%s", awsConfig.AccountId, awsConfig.Role),
+			"Handler":          projConfig.Name,
+			"FunctionName":     projConfig.Name,
+			"Runtime":          "go1.x",
+			"CodeUri":          fmt.Sprintf("./%s.zip", projConfig.Name),
+			"Description":      projConfig.Description,
+			"Role":             fmt.Sprintf("arn:aws:iam::%s:role/%s", awsConfig.AccountId, awsConfig.Role),
+			"AutoPublishAlias": "live",
+			"DeploymentPreference": map[string]interface{}{
+				"Type": "Canary10Percent10Minutes",
+				"Alarms": []string{ // A list of alarms that you want to monitor
+					"!Ref AliasErrorMetricGreaterThanZeroAlarm",
+					"!Ref LatestVersionErrorMetricGreaterThanZeroAlarm",
+				},
+				"Hooks": map[string]interface{}{ //Validation Lambda functions that are run before & after traffic shifting
+					"PreTraffic":  "!Ref PreTrafficLambdaFunction",
+					"PostTraffic": "!Ref PostTrafficLambdaFunction",
+				},
+			},
 		},
 	}
 
