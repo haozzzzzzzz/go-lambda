@@ -45,14 +45,22 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 			"AutoPublishAlias": stage,
 			"DeploymentPreference": map[string]interface{}{
 				"Type": "Canary10Percent10Minutes",
-				"Alarms": []string{ // A list of alarms that you want to monitor
-					"Fn::Ref AliasErrorMetricGreaterThanZeroAlarm",
-					"Fn::Ref LatestVersionErrorMetricGreaterThanZeroAlarm",
-				},
-				"Hooks": map[string]interface{}{ //Validation Lambda functions that are run before & after traffic shifting
-					"PreTraffic":  "Fn::Ref PreTrafficLambdaFunction",
-					"PostTraffic": "Fn::Ref PostTrafficLambdaFunction",
-				},
+				//"Alarms": []interface{}{ // A list of alarms that you want to monitor
+				//	map[string]interface{}{
+				//		"Ref": "AliasErrorMetricGreaterThanZeroAlarm",
+				//	},
+				//	map[string]interface{}{
+				//		"Ref": "LatestVersionErrorMetricGreaterThanZeroAlarm",
+				//	},
+				//},
+				//"Hooks": map[string]interface{}{ //Validation Lambda functions that are run before & after traffic shifting
+				//	"PreTraffic": map[string]interface{}{
+				//		"Ref": lambdaFunctionName,
+				//	},
+				//	"PostTraffic": map[string]interface{}{
+				//		"Ref": lambdaFunctionName,
+				//	},
+				//},
 			},
 		},
 	}
@@ -86,7 +94,10 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 									"type":                "aws_proxy",
 									"httpMethod":          "POST",
 									"passthroughBehavior": "when_no_match",
-									"uri": fmt.Sprintf("Fn::Sub \"arn:aws:apigateway:${AWS:Region}:lambda:path/2015-03-31/functions/${%s.Arn}/invocations\"", lambdaFunctionName),
+									"uri": map[string]interface{}{
+										"Fn::Sub": fmt.Sprintf("arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${%s.Arn}/invocations", lambdaFunctionName),
+									},
+
 									//"uri": fmt.Sprintf("arn:aws:apigateway:%s:lambda:path/2015-03-31/functions/arn:aws:lambda:%s:%s:function:%s:%s/invocations",
 									//	awsConfig.Region,
 									//	awsConfig.Region,
@@ -107,33 +118,41 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 		apiEventName := "ApiEvent"
 		lambdaFunctionEvents[apiEventName] = map[string]interface{}{
 			"Type": "Api",
-			"Properties": map[string]string{
-				"RestApiId": fmt.Sprintf("Fn::Ref %s", apiResourceName),
-				"Path":      "/{proxy+}",
-				"Method":    "ANY",
+			"Properties": map[string]interface{}{
+				"RestApiId": map[string]interface{}{
+					"Ref": apiResourceName,
+				},
+				"Path":   "/{proxy+}",
+				"Method": "ANY",
 			},
 		}
 
 		templateFile.Resources[apiResourceName] = apiResource
 
-		//// permission
-		//apiAccessPermissionName := "ApiAccessPermission"
-		//apiPermissionResource := &SAMResource{
-		//	Type: "AWS::Lambda::Permission",
-		//	Properties: map[string]interface{}{
-		//		"Action":       "lambda:InvokeFunction",
-		//		"FunctionName": fmt.Sprintf("Fn::Ref %s", lambdaFunctionName),
-		//		"Principal":    "apigateway.amazonaws.com",
-		//		"SourceArn":    fmt.Sprintf("Fn::Sub \"arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${%s}/%s/*/*\"", apiResourceName, stage),
-		//	},
-		//}
-		//
-		//templateFile.Resources[apiAccessPermissionName] = apiPermissionResource
+		// permission
+		apiAccessPermissionName := "ApiAccessPermission"
+		apiPermissionResource := &SAMResource{
+			Type: "AWS::Lambda::Permission",
+			Properties: map[string]interface{}{
+				"Action": "lambda:InvokeFunction",
+				"FunctionName": map[string]interface{}{
+					"Ref": lambdaFunctionName,
+				},
+				"Principal": "apigateway.amazonaws.com",
+				"SourceArn": map[string]interface{}{
+					"Fn::Sub": fmt.Sprintf("arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${%s}/%s/*/*", apiResourceName, stage),
+				},
+			},
+		}
+
+		templateFile.Resources[apiAccessPermissionName] = apiPermissionResource
 
 		// 输出
 		templateFile.Outputs["ApiUrl"] = map[string]interface{}{
 			"Description": fmt.Sprintf("%s(%s) Api URL", lambdaFunctionName, stage),
-			"Value":       fmt.Sprintf("Fn::Sub \"https://${%s}.execute-api.${AWS::Region}.amazonaws.com/%s\"", apiResourceName, stage),
+			"Value": map[string]interface{}{
+				"Fn::Sub": fmt.Sprintf("https://${%s}.execute-api.${AWS::Region}.amazonaws.com/%s", apiResourceName, stage),
+			},
 		}
 	}
 
