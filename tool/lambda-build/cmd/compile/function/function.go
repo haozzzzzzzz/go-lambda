@@ -8,6 +8,8 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/haozzzzzzzz/go-rapid-development/cmd"
+	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -35,13 +37,14 @@ func CommandCompileFunction() *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&compileFunction.ProjectPath, "path", "p", "./", "project path")
-
+	flags.StringVarP(&compileFunction.Stage, "stage", "s", "test", "stage name, test or prod")
 	return cmd
 }
 
 // compile function command
 type CompileFunction struct {
 	ProjectPath     string `json:"project_path" yaml:"project_path" validate:"required"`
+	Stage           string `yaml:"stage" validate:"required"`
 	ProjectYamlFile *proj.ProjectYamlFile
 	AWSYamlFile     *proj.AWSYamlFile
 	SAMYamlFile     *proj.SAMTemplateYamlFile
@@ -76,12 +79,12 @@ func (m *CompileFunction) Run() (err error) {
 	}
 
 	// save sam template file
-	m.SAMYamlFile = proj.NewSAMTemplateYamlFileByExistConfig(m.ProjectYamlFile, m.AWSYamlFile)
+	m.SAMYamlFile = proj.NewSAMTemplateYamlFileByExistConfig(m.Stage, m.ProjectYamlFile, m.AWSYamlFile)
 	if nil != err {
 		logrus.Errorf("new sam template yaml obj failed. \n%s.", err)
 		return
 	}
-	err = m.SAMYamlFile.Save(m.ProjectPath, m.ProjectYamlFile.Mode)
+	err = m.SAMYamlFile.Save(m.Stage, m.ProjectPath, m.ProjectYamlFile.Mode)
 	if nil != err {
 		logrus.Errorf("save sam template failed. \n%s.", err)
 		return
@@ -99,7 +102,7 @@ func (m *CompileFunction) Run() (err error) {
 
 func (m *CompileFunction) runGoBuild() (err error) {
 	projConfig := m.ProjectYamlFile
-	deployTarget := fmt.Sprintf("%s/deploy/%s", projConfig.ProjectPath, projConfig.Name)
+	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projConfig.ProjectPath, m.Stage, projConfig.Name)
 	mainFile := fmt.Sprintf("%s/main.go", projConfig.ProjectPath)
 
 	// go build
@@ -117,12 +120,38 @@ func (m *CompileFunction) runGoBuild() (err error) {
 
 func (m *CompileFunction) zipPackage() (err error) {
 	projConfig := m.ProjectYamlFile
-	deployTarget := fmt.Sprintf("%s/deploy/%s", projConfig.ProjectPath, projConfig.Name)
+	projectPath := projConfig.ProjectPath
+	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projectPath, m.Stage, projConfig.Name)
 
-	configDir := fmt.Sprintf("%s/config", projConfig.ProjectPath)
+	// 配置源
+	var stageConfigDir string
+	switch m.Stage {
+	case proj.TestStage.String():
+		stageConfigDir = fmt.Sprintf("%s/config_test", projectPath)
+	case proj.ProdStage.String():
+		stageConfigDir = fmt.Sprintf("%s/config_prod", projectPath)
+	default:
+		err = errors.New("not supported stage")
+		return
+	}
+
+	// 设置config
+	configDir := fmt.Sprintf("%s/config", projectPath)
+	err = os.RemoveAll(configDir)
+	if nil != err {
+		logrus.Errorf("remove %q failed. \n%s.", configDir)
+		return
+	}
+
+	err = file.Copy(stageConfigDir, configDir)
+	if nil != err {
+		logrus.Errorf("copy %q to %q failed. \n%s.", stageConfigDir, configDir, err)
+		return
+	}
+
 	// zip
 	logrus.Info("zip building zip file")
-	zipTarget := fmt.Sprintf("%s/deploy/%s.zip", projConfig.ProjectPath, projConfig.Name)
+	zipTarget := fmt.Sprintf("%s/deploy/%s/%s.zip", projectPath, m.Stage, projConfig.Name)
 
 	// 打包可执行文件和配置文件
 	exit, err := cmd.RunCommand("zip", "-j", zipTarget, deployTarget, configDir)

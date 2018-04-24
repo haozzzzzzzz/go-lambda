@@ -8,10 +8,22 @@ import (
 )
 
 func generateConfigTemplate(lambdaFunc *LambdaFunction) (err error) {
-	configDir := fmt.Sprintf("%s/config", lambdaFunc.ProjectPath)
-	err = os.MkdirAll(configDir, lambdaFunc.Mode)
+	projectPath := lambdaFunc.ProjectPath
+	mode := lambdaFunc.Mode
+
+	// prod配置
+	configDir := fmt.Sprintf("%s/config_prod", projectPath)
+	err = os.MkdirAll(configDir, mode)
 	if nil != err {
-		logrus.Errorf("make project config directory failed. \n%s.", err)
+		logrus.Errorf("make project prod config directory failed. \n%s.", err)
+		return
+	}
+
+	// test配置
+	testConfigDir := fmt.Sprintf("%s/config_test", projectPath)
+	err = os.MkdirAll(testConfigDir, mode)
+	if nil != err {
+		logrus.Errorf("make project test config directory failed. \n%s.", err)
 		return
 	}
 
