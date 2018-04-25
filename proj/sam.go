@@ -33,15 +33,22 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 
 	lambdaFunctionName := projConfig.Name
 
+	var funcRole interface{}
+	if awsConfig.Role == "" {
+		funcRole = ""
+	} else {
+		funcRole = fmt.Sprintf("arn:aws:iam::%s:role/%s", awsConfig.AccountId, awsConfig.Role)
+	}
+
 	resourceLambdaFunction := SAMResource{
 		Type: "AWS::Serverless::Function",
 		Properties: map[string]interface{}{
-			"Handler":      projConfig.Name,
-			"FunctionName": projConfig.Name,
-			"Runtime":      "go1.x",
-			"CodeUri":      fmt.Sprintf("./%s.zip", projConfig.Name),
-			"Description":  projConfig.Description,
-			//"Role":             fmt.Sprintf("arn:aws:iam::%s:role/%s", awsConfig.AccountId, awsConfig.Role),
+			"Handler":          projConfig.Name,
+			"FunctionName":     projConfig.Name,
+			"Runtime":          "go1.x",
+			"CodeUri":          fmt.Sprintf("./%s.zip", projConfig.Name),
+			"Description":      projConfig.Description,
+			"Role":             funcRole,
 			"AutoPublishAlias": stage,
 			"DeploymentPreference": map[string]interface{}{
 				"Type": "Canary10Percent10Minutes",

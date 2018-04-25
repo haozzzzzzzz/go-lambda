@@ -50,7 +50,7 @@ import (
 var mainHandler = handler.%s
 
 func main() {
-	lambda.Start(mainHandler)
+	lambda.Start(handler.GetMainHandler())
 }
 `
 

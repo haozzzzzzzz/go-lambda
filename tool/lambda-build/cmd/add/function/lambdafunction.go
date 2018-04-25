@@ -127,6 +127,13 @@ func (m *LambdaFunction) Run() (err error) {
 		}
 	}
 
+	// create detector mai file
+	err = generateDetectorMainTemplate(m)
+	if nil != err {
+		logrus.Errorf("generate project detector template failed. \n%s.", err)
+		return
+	}
+
 	//create main file
 	err = generateMainTemplate(m)
 	if nil != err {

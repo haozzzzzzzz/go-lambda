@@ -119,12 +119,18 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	// 发布
 	logrus.Info("deploying package")
 	stackName := packageBucket
+	var valueCapabilities string
+	if awsYamlFile.Role == "" {
+		valueCapabilities = "CAPABILITY_NAMED_IAM"
+	} else {
+		valueCapabilities = "CAPABILITY_IAM"
+	}
 	_, err = awsYamlFile.RunAWSCliCommand(
 		"aws",
 		"cloudformation", "deploy",
 		"--template-file", fmt.Sprintf("%s/serverless-output.yaml", stageDeployPath),
 		"--stack-name", stackName,
-		"--capabilities", "CAPABILITY_IAM",
+		"--capabilities", valueCapabilities,
 	)
 	if nil != err {
 		logrus.Errorf("cloudformation deploy lambda function failed. \n%s.", err)

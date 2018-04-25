@@ -23,6 +23,16 @@ func generateHandlerTemplate(lambdaFunc *LambdaFunction) (err error) {
 		return
 	}
 
+	// init file
+	strEventType := lambdaFunc.EventSourceType.String()
+	newInitFileText := fmt.Sprintf(initFileText, strEventType)
+	initFilePath := fmt.Sprintf("%s/init.go", handlerDir)
+	err = ioutil.WriteFile(initFilePath, []byte(newInitFileText), lambdaFunc.Mode)
+	if nil != err {
+		logrus.Errorf("write %q failed. \n%s.", initFilePath, err)
+		return
+	}
+
 	return
 }
 
@@ -34,5 +44,14 @@ import (
 
 func BasicExecutionEventHandler(ctx context.Context, event interface{})(string, error) {
 	return fmt.Sprintf("Hello, world."), nil
+}
+`
+
+var initFileText = `package handler
+
+var mainHandler = %sHandler
+
+func GetMainHandler() interface{} {
+	return mainHandler
 }
 `
