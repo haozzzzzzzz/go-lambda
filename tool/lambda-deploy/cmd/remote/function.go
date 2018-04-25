@@ -90,7 +90,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	)
 	if nil != err {
 		logrus.Errorf("create aws s3 bucket %s failed. \n%s.", packageBucket, err)
-		return
+		// 继续，有可能已经创建了
 	}
 
 	// 打包
