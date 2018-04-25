@@ -63,21 +63,21 @@ func createDeployShellFile(lambdaFunc *LambdaFunction) (err error) {
 	case proj.ApiGatewayEvent:
 		deployShellFileText = `#!/usr/bin/env bash
 echo generating api
-lamb compile api
+lbuild compile api
 
 echo building...
-lamb compile func
+lbuild compile func
 
 echo deploying...
-lamd remote func`
+ldeploy remote func`
 
 	default:
 		deployShellFileText = `#!/usr/bin/env bash
 echo building...
-lamb compile func
+lbuild compile func
 
 echo deploying...
-lamd remote func`
+ldeploy remote func`
 
 	}
 

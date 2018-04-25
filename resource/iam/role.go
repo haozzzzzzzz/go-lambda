@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/haozzzzzzzz/go-lambda/resource"
+	yaml2 "github.com/haozzzzzzzz/go-rapid-development/utils/yaml"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -135,5 +136,16 @@ func NewExecutionRole(roleName string) (role *Role) {
 		}
 	}
 
+	return
+}
+
+func LoadRoleFromFile(filePath string) (role *Role, err error) {
+	role = &Role{}
+	err = yaml2.ReadYamlFromFile(filePath, role)
+	if nil != err {
+		role = nil
+		logrus.Errorf("read role yaml failed. \n%s.", err)
+		return
+	}
 	return
 }

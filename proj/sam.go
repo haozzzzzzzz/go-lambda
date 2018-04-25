@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/haozzzzzzzz/go-lambda/resource/iam"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -22,7 +23,8 @@ type SAMResource struct {
 	Properties map[string]interface{} `yaml:"Properties"`
 }
 
-func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFile, awsConfig *AWSYamlFile) (templateFile *SAMTemplateYamlFile) {
+func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFile, awsConfig *AWSYamlFile) (templateFile *SAMTemplateYamlFile, err error) {
+	projectPath := projConfig.ProjectPath
 	templateFile = &SAMTemplateYamlFile{
 		AWSTemplateFormatVersion: "2010-09-09",
 		Transform:                "AWS::Serverless-2016-10-31",
@@ -33,13 +35,41 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 
 	lambdaFunctionName := projConfig.Name
 
+	// 角色
 	var funcRole interface{}
 	if awsConfig.Role == "" {
-		funcRole = ""
+		roleYamlFilePath := fmt.Sprintf("%s/.proj/role.yaml", projectPath)
+		role, errLoad := iam.LoadRoleFromFile(roleYamlFilePath)
+		if nil != errLoad {
+			err = errLoad
+			logrus.Errorf("load role.yaml from file failed. \n%s.", err)
+			return
+		}
+
+		roleName := role.Properties.RoleName
+		templateFile.Resources[roleName] = role
+
+		funcRole = map[string]interface{}{
+			"Fn::GetAtt": []string{
+				roleName, "Arn",
+			},
+		}
+
 	} else {
 		funcRole = fmt.Sprintf("arn:aws:iam::%s:role/%s", awsConfig.AccountId, awsConfig.Role)
+
 	}
 
+	// 发布流量转移类型
+	var deploymentType string
+	switch stage {
+	case TestStage.String():
+		deploymentType = "AllAtOnce" // 立刻转移
+	case ProdStage.String():
+		deploymentType = "Canary10Percent10Minutes" // 10分钟完成转移
+	}
+
+	// lambda函数
 	resourceLambdaFunction := SAMResource{
 		Type: "AWS::Serverless::Function",
 		Properties: map[string]interface{}{
@@ -51,7 +81,7 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 			"Role":             funcRole,
 			"AutoPublishAlias": stage,
 			"DeploymentPreference": map[string]interface{}{
-				"Type": "Canary10Percent10Minutes",
+				"Type": deploymentType,
 				//"Alarms": []interface{}{ // A list of alarms that you want to monitor
 				//	map[string]interface{}{
 				//		"Ref": "AliasErrorMetricGreaterThanZeroAlarm",
@@ -104,13 +134,6 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 									"uri": map[string]interface{}{
 										"Fn::Sub": fmt.Sprintf("arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${%s.Arn}/invocations", lambdaFunctionName),
 									},
-
-									//"uri": fmt.Sprintf("arn:aws:apigateway:%s:lambda:path/2015-03-31/functions/arn:aws:lambda:%s:%s:function:%s:%s/invocations",
-									//	awsConfig.Region,
-									//	awsConfig.Region,
-									//	awsConfig.AccountId,
-									//	lambdaFunctionName,
-									//	stage),
 								},
 							},
 						},

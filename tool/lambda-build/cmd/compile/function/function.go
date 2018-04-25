@@ -79,7 +79,7 @@ func (m *CompileFunction) Run() (err error) {
 	}
 
 	// save sam template file
-	m.SAMYamlFile = proj.NewSAMTemplateYamlFileByExistConfig(m.Stage, m.ProjectYamlFile, m.AWSYamlFile)
+	m.SAMYamlFile, err = proj.NewSAMTemplateYamlFileByExistConfig(m.Stage, m.ProjectYamlFile, m.AWSYamlFile)
 	if nil != err {
 		logrus.Errorf("new sam template yaml obj failed. \n%s.", err)
 		return
@@ -102,14 +102,31 @@ func (m *CompileFunction) Run() (err error) {
 
 func (m *CompileFunction) runGoBuild() (err error) {
 	projConfig := m.ProjectYamlFile
-	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projConfig.ProjectPath, m.Stage, projConfig.Name)
-	mainFile := fmt.Sprintf("%s/main.go", projConfig.ProjectPath)
+	projPath := projConfig.ProjectPath
+	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projPath, m.Stage, projConfig.Name)
+	mainFile := fmt.Sprintf("%s/main.go", projPath)
+
+	// go run detector
+	detectorMainFile := fmt.Sprintf("%s/.proj/detector/main.go", projPath)
+	detectorMain := fmt.Sprintf("%s/.proj/detector/main", projPath)
+	exit, err := cmd.RunCommand("go", "build", "-v", "-o", detectorMain, detectorMainFile)
+	if nil != err || exit != 0 {
+		logrus.Errorf("build detector failed. \n%s.", err)
+		return
+	}
+
+	roleYamlFilePath := fmt.Sprintf("%s/.proj/role.yaml", projPath)
+	exit, err = cmd.RunCommand(detectorMain, "--path", roleYamlFilePath)
+	if nil != err {
+		logrus.Errorf("generate role.yaml failed. \n%s.", err)
+		return
+	}
 
 	// go build
 	logrus.Info("go building binary")
 	os.Setenv("GOOS", "linux")
 	os.Setenv("GOARCH", "amd64")
-	exit, err := cmd.RunCommand("go", "build", "-v", "-o", deployTarget, mainFile)
+	exit, err = cmd.RunCommand("go", "build", "-v", "-o", deployTarget, mainFile)
 	if nil != err || exit != 0 {
 		logrus.Errorf("run go build command failed. \n%s.", err)
 		return
