@@ -3,12 +3,15 @@ package proj
 type StageType int8
 
 const (
-	TestStage StageType = 1 // 测试
-	ProdStage StageType = 2 // 正式
+	DevStage  StageType = 1 // 开发
+	TestStage StageType = 2 // 测试
+	ProdStage StageType = 3 // 正式
 )
 
 func (m StageType) String() string {
 	switch m {
+	case DevStage:
+		return "dev"
 	case TestStage:
 		return "test"
 	case ProdStage:
