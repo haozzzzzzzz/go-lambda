@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/haozzzzzzzz/go-lambda/resource"
 	"github.com/sirupsen/logrus"
 )
@@ -22,6 +23,6 @@ func GetDynamodb(region string) (db *dynamodb.DynamoDB, err error) {
 	}
 
 	db = dynamodb.New(ses)
-
+	xray.AWS(db.Client)
 	return
 }
