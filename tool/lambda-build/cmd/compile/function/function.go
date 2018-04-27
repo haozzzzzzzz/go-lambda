@@ -72,7 +72,7 @@ func (m *CompileFunction) Run() (err error) {
 	}
 
 	// copy config
-	err = m.copyConfig()
+	err = m.copyConfig(fmt.Sprintf("%s/config", m.ProjectPath))
 	if nil != err {
 		logrus.Errorf("copy config folder failed. %s.", err)
 		return
@@ -110,12 +110,12 @@ func (m *CompileFunction) Run() (err error) {
 func (m *CompileFunction) runGoBuild() (err error) {
 	projConfig := m.ProjectYamlFile
 	projPath := projConfig.ProjectPath
-	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projPath, m.Stage, projConfig.Name)
+	deployTarget := fmt.Sprintf("%s/%s", projPath, projConfig.Name)
 	mainFile := fmt.Sprintf("%s/main.go", projPath)
 
 	// go run detector
 	detectorMainFile := fmt.Sprintf("%s/.proj/detector/main.go", projPath)
-	detectorMain := fmt.Sprintf("%s/detector.out", projPath)
+	detectorMain := fmt.Sprintf("%s/detector", projPath)
 	exit, err := cmd.RunCommand("go", "build", "-v", "-o", detectorMain, detectorMainFile)
 	if nil != err || exit != 0 {
 		logrus.Errorf("build detector failed. \n%s.", err)
@@ -142,7 +142,7 @@ func (m *CompileFunction) runGoBuild() (err error) {
 	return
 }
 
-func (m *CompileFunction) copyConfig() (err error) {
+func (m *CompileFunction) copyConfig(configDir string) (err error) {
 	projectPath := m.ProjectPath
 
 	// 配置源
@@ -158,7 +158,6 @@ func (m *CompileFunction) copyConfig() (err error) {
 	}
 
 	// 设置config
-	configDir := fmt.Sprintf("%s/config", projectPath)
 	err = os.RemoveAll(configDir)
 	if nil != err {
 		logrus.Errorf("remove %q failed. \n%s.", configDir)
@@ -177,15 +176,13 @@ func (m *CompileFunction) copyConfig() (err error) {
 func (m *CompileFunction) zipPackage() (err error) {
 	projConfig := m.ProjectYamlFile
 	projectPath := projConfig.ProjectPath
-	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projectPath, m.Stage, projConfig.Name)
 
 	// zip
 	logrus.Info("zip building zip file")
-	zipTarget := fmt.Sprintf("%s/deploy/%s/%s.zip", projectPath, m.Stage, projConfig.Name)
+	zipWorkPath := fmt.Sprintf("%s/deploy/%s", projectPath, m.Stage)
+	zipTarget := fmt.Sprintf("%s/%s.zip", zipWorkPath, projConfig.Name)
 
-	// 打包可执行文件和配置文件
-	configDir := fmt.Sprintf("%s/config", projectPath)
-	exit, err := cmd.RunCommand("zip", "-j", zipTarget, deployTarget, configDir)
+	exit, err := cmd.RunCommand("zip", "-r", zipTarget, projConfig.Name, "config")
 	if nil != err || exit != 0 {
 		logrus.Errorf("run zip command failed. \n%s.", err)
 		return
