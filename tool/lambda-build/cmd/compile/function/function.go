@@ -113,6 +113,13 @@ func (m *CompileFunction) runGoBuild() (err error) {
 	deployTarget := fmt.Sprintf("%s/%s", projPath, projConfig.Name)
 	mainFile := fmt.Sprintf("%s/main.go", projPath)
 
+	stageDeployFolder := fmt.Sprintf("%s/deploy/%s", projPath, m.Stage)
+	err = os.MkdirAll(stageDeployFolder, m.ProjectYamlFile.Mode)
+	if nil != err {
+		logrus.Errorf("make stage deploy folder failed. %s.", err)
+		return
+	}
+
 	// go run detector
 	detectorMainFile := fmt.Sprintf("%s/.proj/detector/main.go", projPath)
 	detectorMain := fmt.Sprintf("%s/detector", projPath)

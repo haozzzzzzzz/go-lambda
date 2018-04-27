@@ -63,6 +63,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/awslabs/aws-lambda-go-api-proxy.git/gin"
+	"github.com/haozzzzzzzz/go-lambda/resource/xray"
 	"github.com/haozzzzzzzz/go-rapid-development/web/ginbuilder"
 	"github.com/sirupsen/logrus"
 )
@@ -73,6 +74,11 @@ var ginLambda *ginadapter.GinLambda
 func NewGinLambda() (err error) {
 	logrus.Infof("Lambda function %s initializing...", constant.LambdaFunctionName)
 	ginEngine := ginbuilder.GetEngine()
+
+	// bind xray
+	ginEngine.Use(xray.XRayGinMiddleware(constant.LambdaFunctionName))
+
+	// bind routers
 	err = api.BindRouters(ginEngine)
 	if nil != err {
 		logrus.Errorf("set http router failed. \n%s.", err)

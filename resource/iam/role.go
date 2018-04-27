@@ -113,6 +113,23 @@ func (m *Role) AddKinesisPolicy() {
 	m.AddPolicy(policy)
 }
 
+func (m *Role) AddXRayPolicy() {
+	policy := &Policy{
+		PolicyName: "XRayFullAccess",
+	}
+	policy.PolicyDocument.Version = "2012-10-17"
+	statement := &policy.PolicyDocument.Statement
+	*statement = append(*statement, &PolicyDocumentStatement{
+		Effect:   "Allow",
+		Resource: "*",
+		Action: []string{
+			"xray:*",
+		},
+	})
+
+	m.AddPolicy(policy)
+}
+
 func NewExecutionRole(roleName string) (role *Role) {
 	role = &Role{}
 	role.Properties.RoleName = roleName
@@ -152,6 +169,8 @@ func NewExecutionRole(roleName string) (role *Role) {
 			role.AddDynamoDbPolicy()
 		case resource.KinesisResourceType:
 			role.AddKinesisPolicy()
+		case resource.XRayResourceType:
+			role.AddXRayPolicy()
 		}
 	}
 
