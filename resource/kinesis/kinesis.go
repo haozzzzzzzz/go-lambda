@@ -12,16 +12,33 @@ func init() {
 	resource.RegisterResource(resource.KinesisResourceType)
 }
 
-func GetKinesis(region string) (svc *kinesis.Kinesis, err error) {
-	sess, err := session.NewSession(&aws.Config{
+func NewSimpleKinesis(region string) (svc *kinesis.Kinesis, err error) {
+	ses, err := session.NewSession(&aws.Config{
 		Region: aws.String(region),
 	})
 	if nil != err {
-		logrus.Errorf("new aws session failed. \n%s.", err)
+		logrus.Errorf("new aws session failed. %s.", err)
 		return
 	}
 
-	// Create a Kinesis client with additional configuration
-	svc = kinesis.New(sess)
+	svc = kinesis.New(ses)
+
+	return
+}
+
+type KinesisClient struct {
+	StreamName string
+	Session    *session.Session
+	Kinesis    *kinesis.Kinesis
+}
+
+func NewKinesis(sess *session.Session, streamName string) (kinesisClient *KinesisClient, err error) {
+	svc := kinesis.New(sess)
+	kinesisClient = &KinesisClient{
+		StreamName: streamName,
+		Session:    sess,
+		Kinesis:    svc,
+	}
+
 	return
 }
