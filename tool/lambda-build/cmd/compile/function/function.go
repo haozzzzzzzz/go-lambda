@@ -71,6 +71,13 @@ func (m *CompileFunction) Run() (err error) {
 		return
 	}
 
+	// copy config
+	err = m.copyConfig()
+	if nil != err {
+		logrus.Errorf("copy config folder failed. %s.", err)
+		return
+	}
+
 	// go build
 	err = m.runGoBuild()
 	if nil != err {
@@ -108,7 +115,7 @@ func (m *CompileFunction) runGoBuild() (err error) {
 
 	// go run detector
 	detectorMainFile := fmt.Sprintf("%s/.proj/detector/main.go", projPath)
-	detectorMain := fmt.Sprintf("%s/.proj/detector/main", projPath)
+	detectorMain := fmt.Sprintf("%s/detector.out", projPath)
 	exit, err := cmd.RunCommand("go", "build", "-v", "-o", detectorMain, detectorMainFile)
 	if nil != err || exit != 0 {
 		logrus.Errorf("build detector failed. \n%s.", err)
@@ -135,10 +142,8 @@ func (m *CompileFunction) runGoBuild() (err error) {
 	return
 }
 
-func (m *CompileFunction) zipPackage() (err error) {
-	projConfig := m.ProjectYamlFile
-	projectPath := projConfig.ProjectPath
-	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projectPath, m.Stage, projConfig.Name)
+func (m *CompileFunction) copyConfig() (err error) {
+	projectPath := m.ProjectPath
 
 	// 配置源
 	var stageConfigDir string
@@ -166,11 +171,20 @@ func (m *CompileFunction) zipPackage() (err error) {
 		return
 	}
 
+	return
+}
+
+func (m *CompileFunction) zipPackage() (err error) {
+	projConfig := m.ProjectYamlFile
+	projectPath := projConfig.ProjectPath
+	deployTarget := fmt.Sprintf("%s/deploy/%s/%s", projectPath, m.Stage, projConfig.Name)
+
 	// zip
 	logrus.Info("zip building zip file")
 	zipTarget := fmt.Sprintf("%s/deploy/%s/%s.zip", projectPath, m.Stage, projConfig.Name)
 
 	// 打包可执行文件和配置文件
+	configDir := fmt.Sprintf("%s/config", projectPath)
 	exit, err := cmd.RunCommand("zip", "-j", zipTarget, deployTarget, configDir)
 	if nil != err || exit != 0 {
 		logrus.Errorf("run zip command failed. \n%s.", err)
