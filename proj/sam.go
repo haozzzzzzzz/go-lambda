@@ -80,6 +80,7 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 			"Description":      projConfig.Description,
 			"Role":             funcRole,
 			"AutoPublishAlias": stage,
+			"Timeout":          30,
 			"DeploymentPreference": map[string]interface{}{
 				"Type": deploymentType,
 				//"Alarms": []interface{}{ // A list of alarms that you want to monitor
