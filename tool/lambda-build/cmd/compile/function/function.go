@@ -2,6 +2,7 @@ package function
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -193,6 +194,16 @@ func (m *CompileFunction) zipPackage() (err error) {
 	if nil != err || exit != 0 {
 		logrus.Errorf("run zip command failed. \n%s.", err)
 		return
+	}
+
+	gitIgnoreFilePath := fmt.Sprintf("%s/.gitignore", zipWorkPath)
+	if !file.PathExists(gitIgnoreFilePath) {
+		gitIgnoreFileText := fmt.Sprintf("%s.zip", projConfig.Name)
+		err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), projConfig.Mode)
+		if nil != err {
+			logrus.Errorf("write %q failed. %s.", gitIgnoreFilePath, err)
+			return
+		}
 	}
 
 	return

@@ -31,6 +31,17 @@ func generateMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 		return
 	}
 
+	// create .gitignore
+	gitIgnoreFileText := `detector
+main
+`
+	gitIgnoreFilePath := fmt.Sprintf("%s/.gitignore", projectPath)
+	err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), mode)
+	if nil != err {
+		logrus.Errorf("write %q failed. %s.", gitIgnoreFilePath, err)
+		return
+	}
+
 	err = createDeployShellFile(lambdaFunc)
 	if nil != err {
 		logrus.Errorf("create deploy shell file failed. \n%s.", err)
@@ -58,9 +69,21 @@ func createDeployShellFile(lambdaFunc *LambdaFunction) (err error) {
 	projectPath := lambdaFunc.ProjectPath
 	mode := lambdaFunc.Mode
 	var deployShellFileText string
+	var runShellFileText string
 
 	switch lambdaFunc.EventSourceType {
 	case proj.ApiGatewayEvent:
+		runShellFileText = `#!/usr/bin/env bash
+echo generating api
+lbuild compile api
+
+echo building...
+lbuild compile func
+
+echo running main
+go build -o main main.go
+./main`
+
 		deployShellFileText = `#!/usr/bin/env bash
 echo generating api
 lbuild compile api
@@ -72,6 +95,14 @@ echo deploying...
 ldeploy remote func`
 
 	default:
+		runShellFileText = `#!/usr/bin/env bash
+echo building...
+lbuild compile func
+
+echo running main
+go build -o main main.go
+./main`
+
 		deployShellFileText = `#!/usr/bin/env bash
 echo building...
 lbuild compile func
@@ -79,6 +110,14 @@ lbuild compile func
 echo deploying...
 ldeploy remote func`
 
+	}
+
+	// run.sh
+	runShellFilePath := fmt.Sprintf("%s/run.sh", projectPath)
+	err = ioutil.WriteFile(runShellFilePath, []byte(runShellFileText), mode)
+	if nil != err {
+		logrus.Errorf("write %q failed. \n%s.", runShellFilePath, err)
+		return
 	}
 
 	// deploy.sh

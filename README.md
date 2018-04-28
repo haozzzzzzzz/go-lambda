@@ -30,6 +30,7 @@ Lambda go 快速开发库。github地址：[https://github.com/haozzzzzzzz/go-la
 - github.com/aws/aws-sdk-go
 - github.com/aws/aws-xray-sdk-go
 - github.com/awslabs/aws-lambda-go-api-proxy
+- github.com/haozzzzzzzz/go-rapid-development
 
 （很多要装的依赖库？使用`gvt fetch github.com/haozzzzzzzz/go-rapid-development` 时gvt会自动帮你安装依赖包的）
 
@@ -442,8 +443,14 @@ var GetUser ginbuilder.HandleFunc = ginbuilder.HandleFunc{
 
 
 
-## 引用库
 
-- [个人快速开发库go-rapid-development](https://github.com/haozzzzzzzz/go-rapid-development.git)
+## 触发事件
 
+在创建项目时需要选择触发事件的类型，用于创建响应的项目代码。
+
+| 事件参数            | 项目类型                                     |
+| ------------------- | -------------------------------------------- |
+| BasicExecutionEvent | Lambda基本执行，可接收所有上层AWS Lambda事件 |
+| ApiGatewayEvent     | 支持AWS ApiGateway事件触发                   |
+|                     |                                              |
 

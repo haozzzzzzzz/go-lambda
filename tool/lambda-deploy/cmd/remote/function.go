@@ -93,9 +93,10 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 		// 继续，有可能已经创建了
 	}
 
+	stageDeployPath := fmt.Sprintf("%s/deploy/%s", projectPath, m.Stage)
+
 	// 打包
 	logrus.Info("packaging function")
-	stageDeployPath := fmt.Sprintf("%s/deploy/%s", projectPath, m.Stage)
 	dayStartTime, err := time2.DayStartTime(time.Now())
 	if nil != err {
 		logrus.Errorf("get day start time failed. \n%s.", err)

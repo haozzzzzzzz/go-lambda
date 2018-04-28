@@ -10,15 +10,15 @@ import (
 )
 
 func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
-	projDir := fmt.Sprintf("%s/.proj/", lambdaFunc.ProjectPath)
-	err = os.MkdirAll(projDir, lambdaFunc.Mode)
+	innerProjDir := fmt.Sprintf("%s/.proj/", lambdaFunc.ProjectPath)
+	err = os.MkdirAll(innerProjDir, lambdaFunc.Mode)
 	if nil != err {
 		logrus.Errorf("make project proj folder failed. \n%s.", err)
 		return
 	}
 
 	// create secret folder
-	secretDir := fmt.Sprintf("%s/secret", projDir)
+	secretDir := fmt.Sprintf("%s/secret", innerProjDir)
 	err = os.MkdirAll(secretDir, lambdaFunc.Mode)
 	if nil != err {
 		logrus.Errorf("make project secret folder failed. \n%s.", err)
@@ -26,7 +26,7 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 	}
 
 	// create .gitignore
-	err = ioutil.WriteFile(fmt.Sprintf("%s/.gitignore", projDir), []byte("secret"), lambdaFunc.Mode)
+	err = ioutil.WriteFile(fmt.Sprintf("%s/.gitignore", innerProjDir), []byte("secret"), lambdaFunc.Mode)
 	if nil != err {
 		logrus.Errorf("add project .gitignore file failed. \n%s.", err)
 		return
