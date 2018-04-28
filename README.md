@@ -454,3 +454,15 @@ var GetUser ginbuilder.HandleFunc = ginbuilder.HandleFunc{
 | ApiGatewayEvent     | 支持AWS ApiGateway事件触发                   |
 |                     |                                              |
 
+
+
+## 发布阶段
+
+项目每一个阶段产生的和访问的资源不一样。
+
+| 阶段名 | 阶段描述 |
+| ------ | -------- |
+| dev    | 开发阶段 |
+| test   | 测试阶段 |
+| prod   | 生产阶段 |
+
