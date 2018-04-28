@@ -1,10 +1,9 @@
 ---
-typora-root-url: ./readmerc
 typora-copy-images-to: ./readmerc
 ---
 
 # go-lambda
-Lambda go 快速开发库。github地址：https://github.com/haozzzzzzzz/go-lambda，建议使用github地址，可以保证最新的提交。
+Lambda go 快速开发库。github地址：[https://github.com/haozzzzzzzz/go-lambda](https://github.com/haozzzzzzzz/go-lambda)，建议使用github地址，可以保证最新的提交。
 
 
 
@@ -21,7 +20,7 @@ Lambda go 快速开发库。github地址：https://github.com/haozzzzzzzz/go-lam
 
 如果是AWS服务的新用户，务必阅读以下连接的文档申请AWS账号以及安装AWS Cli。
 
-- https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/getting-started.html
+- [https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/getting-started.html](https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/getting-started.html)
 
 
 
@@ -93,7 +92,7 @@ go build -o ldeploy ${GOPATH}/src/github.com/haozzzzzzzz/go-lambda/tool/lambda-d
 
 ## 示例：构建Lambda HelloWorld函数
 
-示例源码：https://github.com/haozzzzzzzz/go_lambda_learning/tree/master/src/ExampleLambdaHelloWorld
+示例源码：[https://github.com/haozzzzzzzz/go_lambda_learning/tree/master/src/ExampleLambdaHelloWorld](https://github.com/haozzzzzzzz/go_lambda_learning/tree/master/src/ExampleLambdaHelloWorld)
 
 使用`lbuild add func`函数添加lambda函数，下面是此命令的详细参数：
 
@@ -124,7 +123,7 @@ lbuild add func -n ExampleLambdaHelloWorld -p ./ -e BasicExecutionEvent
 
 命令期间会询问创建aws相关的参数，例如region、aws access key等，参数和aws-cli设置在本地的`~/.aws/credentials`参数一致。详细设置参考本文**AWS参数配置**章节。
 
-![lbuild add func](/WX20180428-121230@2x.png)
+![lbuild add func](./readmerc/WX20180428-121230@2x.png)
 
 命令创建了一个名字叫ExampleLambdaHelloWorld的项目，位置在./ExampleLambdaHelloWorld，函数触发的事件是BasicExecutionEvent。此函数拥有Lambda基本执行的权限。
 
@@ -137,7 +136,7 @@ cd ExampleLambdaHelloWorld
 
 部署完成后，CloudFormation会自动帮你分配所需资源。可以进入aws的lambda控制台创建一个模版为默认模版的test事件，然后执行。会显示以下返回结果。
 
-![ExampleLambdaHelloWorld](/WX20180428-121836@2x.png)
+![ExampleLambdaHelloWorld](./readmerc/WX20180428-121836@2x.png)
 
 
 
@@ -169,7 +168,7 @@ lbuild add func -n ExampleLambdaGinApi -p ./ -e ApiGatewayEvent
 cd ExampleLambdaGinApi
 ```
 
-![ExampleLambdaGinApi](/image-20180428130703002.png)
+![ExampleLambdaGinApi](./readmerc/image-20180428130703002.png)
 
 目录文件解析：
 
@@ -187,7 +186,7 @@ cd ExampleLambdaGinApi
 
 直接运行`./deploy.sh`，部署成功后，进入Lambda控制台，可以看到CloudFormation自动生成Lambda函数其相关资源及权限。
 
-![image-20180428132332415](/image-20180428132332415.png)
+![image-20180428132332415](./readmerc/image-20180428132332415.png)
 
 
 
@@ -257,23 +256,23 @@ cd ExampleLambdaGinApi
 
 然后点击测试，会返回以下结果：
 
-![image-20180428132827037](/image-20180428132827037.png)
+![image-20180428132827037](./readmerc/image-20180428132827037.png)
 
 
 
 #### APIGateway中测试Lambda API
 
-示例源码：https://github.com/haozzzzzzzz/go_lambda_learning/tree/master/src/ExampleLambdaGinApi
+示例源码：[https://github.com/haozzzzzzzz/go_lambda_learning/tree/master/src/ExampleLambdaGinApi](https://github.com/haozzzzzzzz/go_lambda_learning/tree/master/src/ExampleLambdaGinApi)
 
 进入API Gateway控制台，找到与ExampleLambdaGinApi的Api。然后在阶段中找到test阶段的接口声明，查看其测试调用的url。
 
-![image-20180428133153636](/image-20180428133153636.png)
+![image-20180428133153636](./readmerc/image-20180428133153636.png)
 
-本文用的是https://wizzs12z2c.execute-api.ap-south-1.amazonaws.com/test/
+本文用的是[https://wizzs12z2c.execute-api.ap-south-1.amazonaws.com/test/](https://wizzs12z2c.execute-api.ap-south-1.amazonaws.com/test/)
 
-然后使用HTTP请求工具访问https://wizzs12z2c.execute-api.ap-south-1.amazonaws.com/test/metric即可访问到Lambda程序。
+然后使用HTTP请求工具访问[https://wizzs12z2c.execute-api.ap-south-1.amazonaws.com/test/metric](https://wizzs12z2c.execute-api.ap-south-1.amazonaws.com/test/metric)即可访问到Lambda程序。
 
-![image-20180428133309648](/image-20180428133309648.png)
+![image-20180428133309648](./readmerc/image-20180428133309648.png)
 
 
 
@@ -285,7 +284,7 @@ cd ExampleLambdaGinApi
 
 进入DynamoDB控制台创建一个简单的user表，主键为uid。
 
-![image-20180428133857302](/image-20180428133857302.png)
+![image-20180428133857302](./readmerc/image-20180428133857302.png)
 
 然后在`ExampleLambdaGinApi/api`文件夹中添加`db/api_user.go`，并实现读写两个接口。你可以使用`lbuild add api`的方式进行快速创建此文件，也可以手动创建。不过函数的命名方式**必须准守**以下命名方式：
 
@@ -300,7 +299,7 @@ var <函数名> ginbuilder.HandleFunc = ginbuilder.HandleFunc{
 }
 ```
 
-了解更多关于ginbuilder的信息，可以查看https://github.com/haozzzzzzzz/go-rapid-development。
+了解更多关于ginbuilder的信息，可以查看[https://github.com/haozzzzzzzz/go-rapid-development](https://github.com/haozzzzzzzz/go-rapid-development)。
 
 api_user.go示例
 
@@ -420,26 +419,26 @@ var GetUser ginbuilder.HandleFunc = ginbuilder.HandleFunc{
 
 然后运行`./deploy.sh`将程序编译部署至aws云，进入Lambda控制台查看dynamodb访问权限已自动加上。
 
-![image-20180428143027031](/image-20180428143027031.png)
+![image-20180428143027031](./readmerc/image-20180428143027031.png)
 
 
 
 访问`/user/add`接口添加用户。此处用的是POSTMAN
 
-![image-20180428143127936](/image-20180428143127936.png)
+![image-20180428143127936](./readmerc/image-20180428143127936.png)
 
 
 
 访问`/user/get`	接口获取用户信息。
 
-![image-20180428143209514](/image-20180428143209514.png)
+![image-20180428143209514](./readmerc/image-20180428143209514.png)
 
 
 
 ## 更多示例
 
-- https://github.com/haozzzzzzzz/go_lambda_learning。
-- (内部工程)https://xlbj-gitlab.xunlei.cn/oversea/go-lambda-service
+- [https://github.com/haozzzzzzzz/go_lambda_learning](https://github.com/haozzzzzzzz/go_lambda_learning)
+- (内部工程)[https://xlbj-gitlab.xunlei.cn/oversea/go-lambda-service](https://xlbj-gitlab.xunlei.cn/oversea/go-lambda-service)
 
 
 
