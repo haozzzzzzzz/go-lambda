@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kinesis"
+	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/haozzzzzzzz/go-lambda/resource"
 	"github.com/sirupsen/logrus"
 )
@@ -22,7 +23,7 @@ func NewSimpleKinesis(region string) (svc *kinesis.Kinesis, err error) {
 	}
 
 	svc = kinesis.New(ses)
-
+	xray.AWS(svc.Client)
 	return
 }
 
