@@ -46,6 +46,7 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 			return
 		}
 
+		role.Properties.RoleName = fmt.Sprintf("%s_%s", role.Properties.RoleName, stage)
 		roleName := role.Properties.RoleName
 		templateFile.Resources[roleName] = role
 
