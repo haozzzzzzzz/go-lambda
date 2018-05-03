@@ -91,6 +91,8 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	}
 
 	strDayStartTime := time2.DateStringFormat(dayStartTime)
+	snakeLambdaFunctionName := fmt.Sprintf("%s-%s", snaker.CamelToSnake(projectConfig.Name), m.Stage)
+	snakeLambdaFunctionName = strings.Replace(snakeLambdaFunctionName, "_", "-", -1)
 	s3Prefix := fmt.Sprintf("%s/%s", packageBucketUri, strDayStartTime)
 	_, err = awsYamlFile.RunAWSCliCommand(
 		"aws",
@@ -107,8 +109,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 
 	// 发布
 	logrus.Info("deploying package")
-	stackName := fmt.Sprintf("lambda-%s-%s", snaker.CamelToSnake(projectConfig.Name), m.Stage)
-	stackName = strings.Replace(stackName, "_", "-", -1)
+	stackName := fmt.Sprintf("lambda-%s", snakeLambdaFunctionName)
 	var valueCapabilities string
 	if awsYamlFile.Role == "" {
 		valueCapabilities = "CAPABILITY_NAMED_IAM"
