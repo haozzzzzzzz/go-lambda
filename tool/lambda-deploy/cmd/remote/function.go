@@ -79,20 +79,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	}
 
 	// 创建一个s3的bucket用于存放代码包
-	packageBucket := fmt.Sprintf("lambda-%s-%s", snaker.CamelToSnake(projectConfig.Name), m.Stage)
-	packageBucket = strings.Replace(packageBucket, "_", "-", -1)
-	logrus.Infof("checking s3 bucket %q", packageBucket)
-
-	_, err = awsYamlFile.RunAWSCliCommand(
-		"aws",
-		"s3", "mb", fmt.Sprintf("s3://%s", packageBucket),
-		"--region", awsYamlFile.Region,
-	)
-	if nil != err {
-		logrus.Errorf("create aws s3 bucket %s failed. \n%s.", packageBucket, err)
-		// 继续，有可能已经创建了
-	}
-
+	packageBucketUri := awsYamlFile.CodeS3Bucket
 	stageDeployPath := fmt.Sprintf("%s/deploy/%s", projectPath, m.Stage)
 
 	// 打包
@@ -104,13 +91,14 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	}
 
 	strDayStartTime := time2.DateStringFormat(dayStartTime)
+	s3Prefix := fmt.Sprintf("%s/%s", packageBucketUri, strDayStartTime)
 	_, err = awsYamlFile.RunAWSCliCommand(
 		"aws",
 		"cloudformation", "package",
 		"--template-file", fmt.Sprintf("%s/template.yaml", stageDeployPath),
 		"--output-template-file", fmt.Sprintf("%s/serverless-output.yaml", stageDeployPath),
-		"--s3-bucket", packageBucket,
-		"--s3-prefix", strDayStartTime,
+		"--s3-bucket", packageBucketUri,
+		"--s3-prefix", s3Prefix,
 	)
 	if nil != err {
 		logrus.Errorf("cloudformation package lambda function failed. \n%s.", err)
@@ -119,7 +107,8 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 
 	// 发布
 	logrus.Info("deploying package")
-	stackName := packageBucket
+	stackName := fmt.Sprintf("lambda-%s-%s", snaker.CamelToSnake(projectConfig.Name), m.Stage)
+	stackName = strings.Replace(stackName, "_", "-", -1)
 	var valueCapabilities string
 	if awsYamlFile.Role == "" {
 		valueCapabilities = "CAPABILITY_NAMED_IAM"

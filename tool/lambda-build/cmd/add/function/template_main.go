@@ -31,10 +31,16 @@ func generateMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 		return
 	}
 
+	lambdaFuncName := lambdaFunc.Name
+
 	// create .gitignore
 	gitIgnoreFileText := `detector
 main
+%sprod
+%stest
+%sdev
 `
+	gitIgnoreFileText = fmt.Sprintf(gitIgnoreFileText, lambdaFuncName, lambdaFuncName, lambdaFuncName)
 	gitIgnoreFilePath := fmt.Sprintf("%s/.gitignore", projectPath)
 	err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), mode)
 	if nil != err {

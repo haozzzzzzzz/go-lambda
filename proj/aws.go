@@ -20,6 +20,7 @@ type AWSYamlFile struct {
 	Region       string      `yaml:"region"`
 	OutputFormat string      `yaml:"output_format"`
 	Role         string      `yaml:"role"`
+	CodeS3Bucket string      `yaml:"code_s3_bucket"`
 	Mode         os.FileMode `yaml:"mode"`
 }
 
@@ -155,6 +156,18 @@ func CheckAWSYamlFile(projectPath string, mode os.FileMode, overwrite bool) (aws
 	input = strings.Replace(input, "\n", "", -1)
 	if input != "" {
 		awsYamlFile.Role = input
+	}
+
+	// code deploy s3 bucket
+	fmt.Print(fmt.Sprintf("Input Code Deploy S3 Bucket(%s):", awsYamlFile.CodeS3Bucket))
+	input, err = inputReader.ReadString('\n')
+	if nil != err {
+		logrus.Errorf("read lambda execution role failed. \n%s.", err)
+		return
+	}
+	input = strings.Replace(input, "\n", "", -1)
+	if input != "" {
+		awsYamlFile.CodeS3Bucket = input
 	}
 
 	err = awsYamlFile.Save(projectPath)
