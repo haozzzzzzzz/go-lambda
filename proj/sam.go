@@ -33,7 +33,7 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 		Outputs:                  make(map[string]interface{}),
 	}
 
-	lambdaFunctionName := projConfig.Name
+	lambdaFunctionName := fmt.Sprintf("%s%s", projConfig.Name, stage)
 
 	// 角色
 	var funcRole interface{}
@@ -46,7 +46,8 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 			return
 		}
 
-		role.Properties.RoleName = fmt.Sprintf("%s%s", role.Properties.RoleName, stage)
+		// 更改角色名称
+		role.Properties.RoleName = fmt.Sprintf("%sRole", lambdaFunctionName)
 		roleName := role.Properties.RoleName
 		templateFile.Resources[roleName] = role
 
@@ -67,17 +68,18 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 	case TestStage.String():
 		deploymentType = "AllAtOnce" // 立刻转移
 	case ProdStage.String():
-		deploymentType = "Canary10Percent10Minutes" // 10分钟完成转移
+		//deploymentType = "Canary10Percent10Minutes" // 10分钟完成转移
+		deploymentType = "AllAtOnce" // 立即转移
 	}
 
 	// lambda函数
 	resourceLambdaFunction := SAMResource{
 		Type: "AWS::Serverless::Function",
 		Properties: map[string]interface{}{
-			"Handler":          projConfig.Name,
-			"FunctionName":     projConfig.Name,
+			"Handler":          lambdaFunctionName,
+			"FunctionName":     lambdaFunctionName,
 			"Runtime":          "go1.x",
-			"CodeUri":          fmt.Sprintf("./%s.zip", projConfig.Name),
+			"CodeUri":          fmt.Sprintf("./%s.zip", lambdaFunctionName),
 			"Description":      projConfig.Description,
 			"Role":             funcRole,
 			"AutoPublishAlias": stage,

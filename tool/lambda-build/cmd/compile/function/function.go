@@ -111,7 +111,8 @@ func (m *CompileFunction) Run() (err error) {
 func (m *CompileFunction) runGoBuild() (err error) {
 	projConfig := m.ProjectYamlFile
 	projPath := projConfig.ProjectPath
-	deployTarget := fmt.Sprintf("%s/%s", projPath, projConfig.Name)
+	lambdaFuncName := fmt.Sprintf("%s%s", projConfig.Name, m.Stage)
+	deployTarget := fmt.Sprintf("%s/%s", projPath, lambdaFuncName)
 	mainFile := fmt.Sprintf("%s/main.go", projPath)
 
 	stageDeployFolder := fmt.Sprintf("%s/deploy/%s", projPath, m.Stage)
@@ -184,13 +185,15 @@ func (m *CompileFunction) copyConfig(configDir string) (err error) {
 func (m *CompileFunction) zipPackage() (err error) {
 	projConfig := m.ProjectYamlFile
 	projectPath := projConfig.ProjectPath
+	lambdaFuncName := fmt.Sprintf("%s%s", projConfig.Name, m.Stage)
 
 	// zip
 	logrus.Info("zip building zip file")
 	zipWorkPath := fmt.Sprintf("%s/deploy/%s", projectPath, m.Stage)
-	zipTarget := fmt.Sprintf("%s/%s.zip", zipWorkPath, projConfig.Name)
+	zipFileName := fmt.Sprintf("%s.zip", lambdaFuncName)
+	zipTarget := fmt.Sprintf("%s/%s", zipWorkPath, zipFileName)
 
-	exit, err := cmd.RunCommand("zip", "-r", zipTarget, projConfig.Name, "config")
+	exit, err := cmd.RunCommand("zip", "-r", zipTarget, lambdaFuncName, "config")
 	if nil != err || exit != 0 {
 		logrus.Errorf("run zip command failed. \n%s.", err)
 		return
@@ -198,7 +201,7 @@ func (m *CompileFunction) zipPackage() (err error) {
 
 	gitIgnoreFilePath := fmt.Sprintf("%s/.gitignore", zipWorkPath)
 	if !file.PathExists(gitIgnoreFilePath) {
-		gitIgnoreFileText := fmt.Sprintf("%s.zip", projConfig.Name)
+		gitIgnoreFileText := zipFileName
 		err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), projConfig.Mode)
 		if nil != err {
 			logrus.Errorf("write %q failed. %s.", gitIgnoreFilePath, err)
