@@ -93,7 +93,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	strDayStartTime := time2.DateStringFormat(dayStartTime)
 	snakeLambdaFunctionName := fmt.Sprintf("%s-%s", snaker.CamelToSnake(projectConfig.Name), m.Stage)
 	snakeLambdaFunctionName = strings.Replace(snakeLambdaFunctionName, "_", "-", -1)
-	s3Prefix := fmt.Sprintf("%s/%s", packageBucketUri, strDayStartTime)
+	s3Prefix := fmt.Sprintf("%s/%s", snakeLambdaFunctionName, strDayStartTime)
 	_, err = awsYamlFile.RunAWSCliCommand(
 		"aws",
 		"cloudformation", "package",
