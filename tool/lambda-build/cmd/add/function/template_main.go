@@ -12,18 +12,8 @@ func generateMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 	projectPath := lambdaFunc.ProjectPath
 	mode := lambdaFunc.Mode
 
-	var handlerName string
-	switch lambdaFunc.EventSourceType {
-	case proj.BasicExecutionEvent:
-		handlerName = "BasicExecutionEventHandler"
-	case proj.CustomEvent:
-		handlerName = "CustomEventHandler"
-	case proj.ApiGatewayEvent:
-		handlerName = "ApiGatewayEventHandler"
-	}
-
 	// main.go
-	newMainFileText := fmt.Sprintf(mainFileText, handlerName)
+	newMainFileText := mainFileText
 	mainGoFileName := fmt.Sprintf("%s/main.go", projectPath)
 	err = ioutil.WriteFile(mainGoFileName, []byte(newMainFileText), mode)
 	if nil != err {
@@ -64,8 +54,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-var mainHandler = handler.%s
-
 func main() {
 	lambda.Start(handler.GetMainHandler())
 }
@@ -78,7 +66,7 @@ func createDeployShellFile(lambdaFunc *LambdaFunction) (err error) {
 	var runShellFileText string
 
 	switch lambdaFunc.EventSourceType {
-	case proj.ApiGatewayEvent:
+	case proj.ApiGatewayProxyEvent:
 		runShellFileText = `#!/usr/bin/env bash
 echo generating api
 lbuild compile api

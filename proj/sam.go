@@ -110,7 +110,7 @@ func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFi
 
 	// api gateway event
 	switch projConfig.EventSourceType {
-	case ApiGatewayEvent:
+	case ApiGatewayProxyEvent:
 		apiResourceName := "ApiGatewayApi"
 		apiResource := &SAMResource{
 			Type: "AWS::Serverless::Api",

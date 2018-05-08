@@ -10,6 +10,11 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	EffectAllow = "allow"
+	EffectDeny  = "deny"
+)
+
 type AssumeRolePolicyDocumentStatement struct {
 	Effect    string `yaml:"Effect"`
 	Principal struct {

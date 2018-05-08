@@ -13,19 +13,24 @@ import (
 type LambdaFunctionEventSourceType int8
 
 const (
-	BasicExecutionEvent LambdaFunctionEventSourceType = 0 // 基本执行
-	CustomEvent         LambdaFunctionEventSourceType = 1 // 自定义事件
-	ApiGatewayEvent     LambdaFunctionEventSourceType = 2 // API GATEWAY事件
+	BasicExecutionEvent       LambdaFunctionEventSourceType = 0 // 基本执行
+	CustomEvent               LambdaFunctionEventSourceType = 1 // 自定义事件
+	ApiGatewayProxyEvent      LambdaFunctionEventSourceType = 2 // API GATEWAY AWS Proxy事件
+	ApiGatewayAuthorizerEvent LambdaFunctionEventSourceType = 3 // API GATEWAY 授权校验事件
 )
 
 func NewLambdaFunctionEventSourceType(strEvent string) LambdaFunctionEventSourceType {
 	switch strEvent {
 	case CustomEvent.String():
 		return CustomEvent
-	case ApiGatewayEvent.String():
-		return ApiGatewayEvent
+	case ApiGatewayProxyEvent.String():
+		return ApiGatewayProxyEvent
+	case ApiGatewayAuthorizerEvent.String():
+		return ApiGatewayAuthorizerEvent
 	case BasicExecutionEvent.String():
 		return BasicExecutionEvent
+	default:
+		logrus.Fatal("unsupported event")
 	}
 	return BasicExecutionEvent
 }
@@ -34,8 +39,10 @@ func (m LambdaFunctionEventSourceType) String() string {
 	switch m {
 	case CustomEvent:
 		return "CustomEvent"
-	case ApiGatewayEvent:
-		return "ApiGatewayEvent"
+	case ApiGatewayProxyEvent:
+		return "ApiGatewayProxyEvent"
+	case ApiGatewayAuthorizerEvent:
+		return "ApiGatewayAuthorizerEvent"
 	case BasicExecutionEvent:
 		fallthrough
 	default:

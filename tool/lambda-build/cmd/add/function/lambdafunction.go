@@ -119,10 +119,17 @@ func (m *LambdaFunction) Run() (err error) {
 	switch m.EventSourceType {
 	case proj.BasicExecutionEvent:
 	case proj.CustomEvent:
-	case proj.ApiGatewayEvent:
+	case proj.ApiGatewayProxyEvent:
 		err = generateApiTemplate(m)
 		if nil != err {
 			logrus.Errorf("generate api template failed. \n%s.", err)
+			return
+		}
+
+	case proj.ApiGatewayAuthorizerEvent:
+		err = generateApiGatewayAuthorizer(m)
+		if nil != err {
+			logrus.Errorf("generate api gateway authorizer failed. %s.", err)
 			return
 		}
 	}
