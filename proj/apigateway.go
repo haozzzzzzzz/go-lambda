@@ -16,11 +16,12 @@ const (
 )
 
 type AuthorizerConfig struct {
-	ProjectPath        string
-	ConfigFilePath     string
-	ProjectYamlFile    *ProjectYamlFile
-	AuthorizerYamlFile *AuthorizerYamlFile
-	Mode               os.FileMode
+	ProjectPath             string
+	ConfigFilePath          string
+	ProjectYamlFile         *ProjectYamlFile
+	AuthorizerYamlFile      *AuthorizerYamlFile
+	AuthorizerYamlFileExsit bool
+	Mode                    os.FileMode
 }
 
 func NewAuthorizerConfigFromProjPath(projPath string) (config *AuthorizerConfig, err error) {
@@ -48,11 +49,12 @@ func NewAuthorizerConfig(projYamlFile *ProjectYamlFile) (config *AuthorizerConfi
 	projPath := projYamlFile.ProjectPath
 
 	config = &AuthorizerConfig{
-		ProjectPath:        projPath,
-		ProjectYamlFile:    projYamlFile,
-		ConfigFilePath:     fmt.Sprintf("%s/.proj/%s", projPath, AuthorizerFileName),
-		AuthorizerYamlFile: NewAuthorizerYamlFile(),
-		Mode:               projYamlFile.Mode,
+		ProjectPath:             projPath,
+		ProjectYamlFile:         projYamlFile,
+		ConfigFilePath:          fmt.Sprintf("%s/.proj/%s", projPath, AuthorizerFileName),
+		AuthorizerYamlFile:      NewAuthorizerYamlFile(),
+		AuthorizerYamlFileExsit: false,
+		Mode: projYamlFile.Mode,
 	}
 
 	config.Load()
@@ -62,6 +64,7 @@ func NewAuthorizerConfig(projYamlFile *ProjectYamlFile) (config *AuthorizerConfi
 
 func (m *AuthorizerConfig) Load() (err error) {
 	if file.PathExists(m.ConfigFilePath) {
+		m.AuthorizerYamlFileExsit = true
 		err = yaml.ReadYamlFromFile(m.ConfigFilePath, m.AuthorizerYamlFile)
 		if nil != err {
 			logrus.Errorf("read %q failed. %s.", m.ConfigFilePath, err)
