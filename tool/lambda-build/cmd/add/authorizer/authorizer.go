@@ -12,7 +12,8 @@ func CommandAddAuthorizerFunction() *cobra.Command {
 	var projectPath string
 	cmd := &cobra.Command{
 		Use:   "authorizer",
-		Short: "add apig authorizer",
+		Short: "add api authorizer",
+		Long:  "only latest added authorizer makes effect",
 		Run: func(cmd *cobra.Command, args []string) {
 			projectPath, err := filepath.Abs(projectPath)
 			if nil != err {

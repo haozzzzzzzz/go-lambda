@@ -116,7 +116,7 @@ Flags:
 | ------------- | ------ | ---------------------------- | --------------------------------------------------------- |
 | --description | -d     | Lambda函数的描述             | 默认描述为“AWS Serverless Function”                       |
 | --event       | -e     | Lambda函数出发事件           | BasicExecutionEvent（默认），见[触发事件](#event-trigger) |
-| --name        | -n     | Lambda函数的名称             | 必填。                                                    |
+| --name        | -n     | Lambda函数的名称             | 必填。只能为字母或数字，字母作为开头                      |
 | --path        | -p     | Lambda函数项目创建的文件目录 | 默认为"./"                                                |
 
 示例

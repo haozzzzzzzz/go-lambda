@@ -1,7 +1,9 @@
 package function
 
 import (
+	"fmt"
 	"os"
+	"regexp"
 	"testing"
 )
 
@@ -15,4 +17,12 @@ func TestLambdaFunction_Run(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func TestNameLimit(t *testing.T) {
+	matched, err := regexp.MatchString("^[A-za-z][A-Za-z0-9]+$", "1Helsss111loWorld")
+	if nil != err {
+		return
+	}
+	fmt.Println(matched)
 }

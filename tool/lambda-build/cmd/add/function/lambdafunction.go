@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"syscall"
 
 	"github.com/go-playground/validator"
@@ -66,6 +67,18 @@ func (m *LambdaFunction) Run() (err error) {
 		return
 	}
 	m.ProjectPath = fmt.Sprintf("%s/%s", dir, m.Name)
+
+	// 名字由字母和数字组成，由字母开始
+	matched, err := regexp.MatchString("^[A-za-z][A-Za-z0-9]+$", m.Name)
+	if nil != err {
+		logrus.Errorf("run regexp match string failed. %s.", err)
+		return
+	}
+
+	if !matched {
+		err = errors.New("function name should be composed of letters and numbers, and it begins with letter")
+		return
+	}
 
 	err = validator.New().Struct(m)
 	if nil != err {
