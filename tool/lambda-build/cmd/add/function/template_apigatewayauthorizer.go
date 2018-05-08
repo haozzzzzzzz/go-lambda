@@ -29,8 +29,8 @@ import (
 	"github.com/haozzzzzzzz/go-lambda/resource/apigateway"
 )
 
-func ApiGatewayAuthorizerEventHandler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequestTypeRequest) (response *events.APIGatewayCustomAuthorizerResponse, err error) {
-	response = apigateway.GetAllowAuthorizerResponse(constant.LambdaFunctionName, event.MethodArn)
+func ApiGatewayAuthorizerEventHandler(ctx context.Context, request events.APIGatewayCustomAuthorizerRequestTypeRequest) (response *events.APIGatewayCustomAuthorizerResponse, err error) {
+	response = apigateway.GetAllowAuthorizerResponse(constant.LambdaFunctionName, request.MethodArn)
 	return
 }
 `
