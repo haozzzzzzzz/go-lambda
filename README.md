@@ -2,7 +2,10 @@
 typora-copy-images-to: ./readmerc
 ---
 
+[TOC]
+
 # go-lambda
+
 Lambda go 快速开发库。github地址：[https://github.com/haozzzzzzzz/go-lambda](https://github.com/haozzzzzzzz/go-lambda)，建议使用github地址，可以保证最新的提交。
 
 
@@ -109,12 +112,12 @@ Flags:
   -p, --path string          set lambda project path (default "./") Lambda函数项目创建的位置
 ```
 
-| 长flag        | 短flag | 意义                         | 选项                                         |
-| ------------- | ------ | ---------------------------- | -------------------------------------------- |
-| --description | -d     | Lambda函数的描述             | 默认描述为“AWS Serverless Function”          |
-| --event       | -e     | Lambda函数出发事件           | BasicExecutionEvent（默认）、ApiGatewayEvent |
-| --name        | -n     | Lambda函数的名称             | 必填。                                       |
-| --path        | -p     | Lambda函数项目创建的文件目录 | 默认为"./"                                   |
+| 长flag        | 短flag | 意义                         | 选项                                                      |
+| ------------- | ------ | ---------------------------- | --------------------------------------------------------- |
+| --description | -d     | Lambda函数的描述             | 默认描述为“AWS Serverless Function”                       |
+| --event       | -e     | Lambda函数出发事件           | BasicExecutionEvent（默认），见[触发事件](#event-trigger) |
+| --name        | -n     | Lambda函数的名称             | 必填。                                                    |
+| --path        | -p     | Lambda函数项目创建的文件目录 | 默认为"./"                                                |
 
 示例
 
@@ -162,10 +165,10 @@ cd ExampleLambdaHelloWorld
 
 ### 示例：使用Lambda构建Gin风格的Api
 
-运行命令一个由ApiGatewayEvent触发的Api项目。
+运行命令一个由ApiGatewayProxyEvent触发的Api项目。
 
 ```shell
-lbuild add func -n ExampleLambdaGinApi -p ./ -e ApiGatewayEvent
+lbuild add func -n ExampleLambdaGinApi -p ./ -e ApiGatewayProxyEvent
 cd ExampleLambdaGinApi
 ```
 
@@ -443,16 +446,14 @@ var GetUser ginbuilder.HandleFunc = ginbuilder.HandleFunc{
 
 
 
-
-## 触发事件
-
+## Event Trigger
 在创建项目时需要选择触发事件的类型，用于创建响应的项目代码。
 
-| 事件参数            | 项目类型                                     |
-| ------------------- | -------------------------------------------- |
-| BasicExecutionEvent | Lambda基本执行，可接收所有上层AWS Lambda事件 |
-| ApiGatewayEvent     | 支持AWS ApiGateway事件触发                   |
-|                     |                                              |
+| 事件参数                  | 项目类型                                     |
+| ------------------------- | -------------------------------------------- |
+| BasicExecutionEvent       | Lambda基本执行，可接收所有上层AWS Lambda事件 |
+| ApiGatewayProxyEvent      | 支持AWS ApiGateway Proxy事件触发             |
+| ApiGatewayAuthorizerEvent | ApiGateway Authorizer 事件                   |
 
 
 

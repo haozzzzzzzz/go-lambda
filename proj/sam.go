@@ -5,10 +5,38 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/haozzzzzzzz/go-lambda/resource/iam"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
+
+type SAMTemplateConfig struct {
+	State               string
+	ProjectPath         string
+	ProjectYamlFile     *ProjectYamlFile
+	AWSYamlFile         *AWSYamlFile
+	SAMTemplateYamlFile *SAMTemplateYamlFile
+	LambdaFunctionName  string
+	Mode                os.FileMode
+}
+
+func NewSAMTempalteConfig(stage string, projConfig *ProjectYamlFile, awsConfig *AWSYamlFile) (config *SAMTemplateConfig, err error) {
+	config = &SAMTemplateConfig{
+		State:               stage,
+		ProjectPath:         projConfig.ProjectPath,
+		ProjectYamlFile:     projConfig,
+		AWSYamlFile:         awsConfig,
+		SAMTemplateYamlFile: NewSAMTemplateYamlFile(),
+		LambdaFunctionName:  fmt.Sprintf("%s%s", projConfig.Name, stage),
+		Mode:                projConfig.Mode,
+	}
+
+	err = config.Build()
+	if nil != err {
+		logrus.Errorf("build sam template failed. %s.", err)
+		return
+	}
+	return
+}
 
 type SAMTemplateYamlFile struct {
 	AWSTemplateFormatVersion string                 `yaml:"AWSTemplateFormatVersion"`
@@ -18,184 +46,56 @@ type SAMTemplateYamlFile struct {
 	Outputs                  map[string]interface{} `yaml:"Outputs"`
 }
 
+func NewSAMTemplateYamlFile() (templateFile *SAMTemplateYamlFile) {
+	templateFile = &SAMTemplateYamlFile{
+		AWSTemplateFormatVersion: "2010-09-09",
+		Transform:                "AWS::Serverless-2016-10-31",
+		Description:              "AWS Serverless Lambda Function",
+		Resources:                make(map[string]interface{}),
+		Outputs:                  make(map[string]interface{}),
+	}
+	return
+}
+
 type SAMResource struct {
 	Type       string                 `yaml:"Type"`
 	Properties map[string]interface{} `yaml:"Properties"`
 }
 
-func NewSAMTemplateYamlFileByExistConfig(stage string, projConfig *ProjectYamlFile, awsConfig *AWSYamlFile) (templateFile *SAMTemplateYamlFile, err error) {
-	projectPath := projConfig.ProjectPath
-	templateFile = &SAMTemplateYamlFile{
-		AWSTemplateFormatVersion: "2010-09-09",
-		Transform:                "AWS::Serverless-2016-10-31",
-		Description:              projConfig.Description,
-		Resources:                make(map[string]interface{}),
-		Outputs:                  make(map[string]interface{}),
+func (m *SAMTemplateConfig) Build() (err error) {
+	templateFile := m.SAMTemplateYamlFile
+	projConfig := m.ProjectYamlFile
+
+	// 对象初始化
+	templateFile.Description = projConfig.Description
+
+	// 创建lambda函数相关
+	err = m.BuildLambdaFunction()
+	if nil != err {
+		logrus.Errorf("build lambda function failed. %s.", err)
+		return
 	}
-
-	lambdaFunctionName := fmt.Sprintf("%s%s", projConfig.Name, stage)
-
-	// 角色
-	var funcRole interface{}
-	if awsConfig.Role == "" {
-		roleYamlFilePath := fmt.Sprintf("%s/.proj/role.yaml", projectPath)
-		role, errLoad := iam.LoadRoleFromFile(roleYamlFilePath)
-		if nil != errLoad {
-			err = errLoad
-			logrus.Errorf("load role.yaml from file failed. \n%s.", err)
-			return
-		}
-
-		// 更改角色名称
-		role.Properties.RoleName = fmt.Sprintf("%sRole", lambdaFunctionName)
-		roleName := role.Properties.RoleName
-		templateFile.Resources[roleName] = role
-
-		funcRole = map[string]interface{}{
-			"Fn::GetAtt": []string{
-				roleName, "Arn",
-			},
-		}
-
-	} else {
-		funcRole = fmt.Sprintf("arn:aws:iam::%s:role/%s", awsConfig.AccountId, awsConfig.Role)
-
-	}
-
-	// 发布流量转移类型
-	var deploymentType string
-	switch stage {
-	case TestStage.String():
-		deploymentType = "AllAtOnce" // 立刻转移
-	case ProdStage.String():
-		//deploymentType = "Canary10Percent10Minutes" // 10分钟完成转移
-		deploymentType = "AllAtOnce" // 立即转移
-	}
-
-	// lambda函数
-	resourceLambdaFunction := SAMResource{
-		Type: "AWS::Serverless::Function",
-		Properties: map[string]interface{}{
-			"Handler":          lambdaFunctionName,
-			"FunctionName":     lambdaFunctionName,
-			"Runtime":          "go1.x",
-			"CodeUri":          fmt.Sprintf("./%s.zip", lambdaFunctionName),
-			"Description":      projConfig.Description,
-			"Role":             funcRole,
-			"AutoPublishAlias": stage,
-			"Timeout":          30,
-			"DeploymentPreference": map[string]interface{}{
-				"Type": deploymentType,
-				//"Alarms": []interface{}{ // A list of alarms that you want to monitor
-				//	map[string]interface{}{
-				//		"Ref": "AliasErrorMetricGreaterThanZeroAlarm",
-				//	},
-				//	map[string]interface{}{
-				//		"Ref": "LatestVersionErrorMetricGreaterThanZeroAlarm",
-				//	},
-				//},
-				//"Hooks": map[string]interface{}{ //Validation Lambda functions that are run before & after traffic shifting
-				//	"PreTraffic": map[string]interface{}{
-				//		"Ref": lambdaFunctionName,
-				//	},
-				//	"PostTraffic": map[string]interface{}{
-				//		"Ref": lambdaFunctionName,
-				//	},
-				//},
-			},
-		},
-	}
-
-	templateFile.Resources[lambdaFunctionName] = resourceLambdaFunction
 
 	// api gateway event
 	switch projConfig.EventSourceType {
 	case ApiGatewayProxyEvent:
-		apiResourceName := "ApiGatewayApi"
-		apiResource := &SAMResource{
-			Type: "AWS::Serverless::Api",
-			Properties: map[string]interface{}{
-				"Name":      lambdaFunctionName, // 显示在ApiGateway控制台的资源名称
-				"StageName": stage,
-				"DefinitionBody": map[string]interface{}{
-					"swagger": "2.0",
-					"info": map[string]interface{}{
-						"version": "1.0",
-						"title":   lambdaFunctionName,
-					},
-					"basePath": fmt.Sprintf("/%s", stage),
-					"schemes":  []string{"https"},
-					"paths": map[string]interface{}{
-						"/{proxy+}": map[string]interface{}{
-							"x-amazon-apigateway-any-method": map[string]interface{}{
-								"produces": []string{
-									"application/json",
-								},
-								"x-amazon-apigateway-integration": map[string]interface{}{
-									"type":                "aws_proxy",
-									"httpMethod":          "POST",
-									"passthroughBehavior": "when_no_match",
-									"uri": map[string]interface{}{
-										"Fn::Sub": fmt.Sprintf("arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${%s.Arn}/invocations", lambdaFunctionName),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		// lambda function api event
-		lambdaFunctionEvents := make(map[string]interface{})
-		resourceLambdaFunction.Properties["Events"] = lambdaFunctionEvents
-		apiEventName := "ApiEvent"
-		lambdaFunctionEvents[apiEventName] = map[string]interface{}{
-			"Type": "Api",
-			"Properties": map[string]interface{}{
-				"RestApiId": map[string]interface{}{
-					"Ref": apiResourceName,
-				},
-				"Path":   "/{proxy+}",
-				"Method": "ANY",
-			},
-		}
-
-		templateFile.Resources[apiResourceName] = apiResource
-
-		// permission
-		apiAccessPermissionName := "ApiAccessPermission"
-		apiPermissionResource := &SAMResource{
-			Type: "AWS::Lambda::Permission",
-			Properties: map[string]interface{}{
-				"Action": "lambda:InvokeFunction",
-				"FunctionName": map[string]interface{}{
-					"Ref": lambdaFunctionName,
-				},
-				"Principal": "apigateway.amazonaws.com",
-				"SourceArn": map[string]interface{}{
-					"Fn::Sub": fmt.Sprintf("arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${%s}/%s/*/*", apiResourceName, stage),
-				},
-			},
-		}
-
-		templateFile.Resources[apiAccessPermissionName] = apiPermissionResource
-
-		// 输出
-		templateFile.Outputs["ApiUrl"] = map[string]interface{}{
-			"Description": fmt.Sprintf("%s(%s) Api URL", lambdaFunctionName, stage),
-			"Value": map[string]interface{}{
-				"Fn::Sub": fmt.Sprintf("https://${%s}.execute-api.${AWS::Region}.amazonaws.com/%s", apiResourceName, stage),
-			},
+		err = m.BuildApiGatewayProxyEvent()
+		if nil != err {
+			logrus.Errorf("build api gateway proxy event failed. %s.", err)
+			return
 		}
 	}
 
 	return
 }
 
-func (m *SAMTemplateYamlFile) Save(stage string, projectPath string, mode os.FileMode) (err error) {
+func (m *SAMTemplateConfig) Save() (err error) {
+	stage := m.State
+	projectPath := m.ProjectPath
+	mode := m.Mode
+
 	samYamlFilePath := fmt.Sprintf("%s/deploy/%s/template.yaml", projectPath, stage)
-	byteYaml, err := yaml.Marshal(m)
+	byteYaml, err := yaml.Marshal(m.SAMTemplateYamlFile)
 	if nil != err {
 		logrus.Errorf("marshal sam yaml file failed. \n%s.", err)
 		return

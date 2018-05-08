@@ -44,11 +44,11 @@ func CommandCompileFunction() *cobra.Command {
 
 // compile function command
 type CompileFunction struct {
-	ProjectPath     string `json:"project_path" yaml:"project_path" validate:"required"`
-	Stage           string `yaml:"stage" validate:"required"`
-	ProjectYamlFile *proj.ProjectYamlFile
-	AWSYamlFile     *proj.AWSYamlFile
-	SAMYamlFile     *proj.SAMTemplateYamlFile
+	ProjectPath       string `json:"project_path" yaml:"project_path" validate:"required"`
+	Stage             string `yaml:"stage" validate:"required"`
+	ProjectYamlFile   *proj.ProjectYamlFile
+	AWSYamlFile       *proj.AWSYamlFile
+	SAMTemplateConfig *proj.SAMTemplateConfig
 }
 
 func (m *CompileFunction) Run() (err error) {
@@ -87,12 +87,12 @@ func (m *CompileFunction) Run() (err error) {
 	}
 
 	// save sam template file
-	m.SAMYamlFile, err = proj.NewSAMTemplateYamlFileByExistConfig(m.Stage, m.ProjectYamlFile, m.AWSYamlFile)
+	m.SAMTemplateConfig, err = proj.NewSAMTempalteConfig(m.Stage, m.ProjectYamlFile, m.AWSYamlFile)
 	if nil != err {
-		logrus.Errorf("new sam template yaml obj failed. \n%s.", err)
+		logrus.Errorf("new sam template config failed. \n%s.", err)
 		return
 	}
-	err = m.SAMYamlFile.Save(m.Stage, m.ProjectPath, m.ProjectYamlFile.Mode)
+	err = m.SAMTemplateConfig.Save()
 	if nil != err {
 		logrus.Errorf("save sam template failed. \n%s.", err)
 		return

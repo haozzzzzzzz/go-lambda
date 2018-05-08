@@ -25,7 +25,6 @@ func CommandAddLambdaFunction() *cobra.Command {
 		Short: "add lambda function",
 		Run: func(cmd *cobra.Command, args []string) {
 			handler.EventSourceType = proj.NewLambdaFunctionEventSourceType(eventType)
-
 			err := handler.Run()
 			if nil != err {
 				logrus.Errorf("run add lambda function command failed. \n%s.", err)
