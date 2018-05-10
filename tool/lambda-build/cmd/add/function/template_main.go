@@ -27,6 +27,7 @@ func generateMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 	gitIgnoreFileText := `detector
 main
 %sprod
+%spre
 %stest
 %sdev
 `

@@ -51,6 +51,8 @@ func (m *SAMTemplateConfig) BuildLambdaFunction() (err error) {
 	case ProdStage.String():
 		//deploymentType = "Canary10Percent10Minutes" // 10分钟完成转移
 		deploymentType = "AllAtOnce" // 立即转移
+	default:
+		deploymentType = "AllAtOnce" // 立即转移
 	}
 
 	// lambda函数
