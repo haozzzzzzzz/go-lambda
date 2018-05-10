@@ -67,6 +67,10 @@ func (m *SAMTemplateConfig) BuildLambdaFunction() (err error) {
 			"Role":             funcRole,
 			"AutoPublishAlias": stage,
 			"Timeout":          30,
+			"Tags": map[string]string{
+				"FunctionGroup": m.ProjectYamlFile.Name,
+				"Stage":         m.State,
+			},
 			"DeploymentPreference": map[string]interface{}{
 				"Type": deploymentType,
 				//"Alarms": []interface{}{ // A list of alarms that you want to monitor

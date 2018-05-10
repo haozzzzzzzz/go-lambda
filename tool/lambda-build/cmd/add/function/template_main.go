@@ -72,38 +72,54 @@ func createDeployShellFile(lambdaFunc *LambdaFunction) (err error) {
 echo generating api
 lbuild compile api
 
-echo building...
-lbuild compile func
-
 echo running main
 go build -o main main.go
 ./main`
 
 		deployShellFileText = `#!/usr/bin/env bash
+
+stage=$1
+
+if [ -z ${stage} ]
+then
+    stage="dev"
+fi
+
+echo deploy target stage environment: ${stage}
+
 echo generating api
-lbuild compile api
+lbuild compile api -s ${stage}
 
 echo building...
-lbuild compile func
+lbuild compile func -s ${stage}
 
 echo deploying...
-ldeploy remote func`
+ldeploy remote func -s ${stage}
+`
 
 	default:
 		runShellFileText = `#!/usr/bin/env bash
-echo building...
-lbuild compile func
-
 echo running main
 go build -o main main.go
 ./main`
 
 		deployShellFileText = `#!/usr/bin/env bash
+
+stage=$1
+
+if [ -z ${stage} ]
+then
+    stage="dev"
+fi
+
+echo deploy target stage environment: ${stage}
+
 echo building...
-lbuild compile func
+lbuild compile func -s ${stage}
 
 echo deploying...
-ldeploy remote func`
+ldeploy remote func -s ${stage}
+`
 
 	}
 
