@@ -38,7 +38,7 @@ func CommandCompileFunction() *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&compileFunction.ProjectPath, "path", "p", "./", "project path")
-	flags.StringVarP(&compileFunction.Stage, "stage", "s", "test", "stage name, test or prod")
+	flags.StringVarP(&compileFunction.Stage, "stage", "s", "dev", "stage name, [dev test pre prod]")
 	return cmd
 }
 

@@ -45,7 +45,7 @@ func CommandRemoteFunction() *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&remoteLambdaFunction.ProjectPath, "path", "p", "./", "project path")
-	flags.StringVarP(&remoteLambdaFunction.Stage, "stage", "s", "test", "deploy stage name. \"test\" or \"prod\"")
+	flags.StringVarP(&remoteLambdaFunction.Stage, "stage", "s", "dev", "stage name, [dev test pre prod]")
 	return cmd
 }
 
