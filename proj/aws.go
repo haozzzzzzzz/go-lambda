@@ -179,6 +179,7 @@ func CheckAWSYamlFile(projectPath string, mode os.FileMode, overwrite bool) (aws
 	return
 }
 
+// 运行AWS Cli命令时需要设置环境变量
 func (m *AWSYamlFile) RunAWSCliCommand(command string, args ...string) (exit int, err error) {
 	os.Setenv("AWS_ACCESS_KEY_ID", m.AccessKey)
 	os.Setenv("AWS_SECRET_ACCESS_KEY", m.SecretKey)

@@ -8,7 +8,7 @@ func CommandRemote() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:     "remote",
 		Short:   "remote command",
-		Example: "remote lamdba",
+		Example: "remote func",
 	}
 
 	cmd.AddCommand(CommandRemoteFunction())

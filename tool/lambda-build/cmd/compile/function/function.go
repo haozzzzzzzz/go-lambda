@@ -157,10 +157,14 @@ func (m *CompileFunction) copyConfig(configDir string) (err error) {
 	// 配置源
 	var stageConfigDir string
 	switch m.Stage {
+	case proj.DevStage.String():
+		stageConfigDir = fmt.Sprintf("%s/stage/%s/config", projectPath, m.Stage)
 	case proj.TestStage.String():
-		stageConfigDir = fmt.Sprintf("%s/config_test", projectPath)
+		stageConfigDir = fmt.Sprintf("%s/stage/%s/config", projectPath, m.Stage)
+	case proj.PreStage.String():
+		stageConfigDir = fmt.Sprintf("%s/stage/%s/config", projectPath, m.Stage)
 	case proj.ProdStage.String():
-		stageConfigDir = fmt.Sprintf("%s/config_prod", projectPath)
+		stageConfigDir = fmt.Sprintf("%s/stage/%s/config", projectPath, m.Stage)
 	default:
 		err = errors.New("not supported stage")
 		return
