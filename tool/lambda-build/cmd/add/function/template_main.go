@@ -31,7 +31,7 @@ main
 %stest
 %sdev
 `
-	gitIgnoreFileText = fmt.Sprintf(gitIgnoreFileText, lambdaFuncName, lambdaFuncName, lambdaFuncName)
+	gitIgnoreFileText = fmt.Sprintf(gitIgnoreFileText, lambdaFuncName, lambdaFuncName, lambdaFuncName, lambdaFuncName)
 	gitIgnoreFilePath := fmt.Sprintf("%s/.gitignore", projectPath)
 	err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), mode)
 	if nil != err {
