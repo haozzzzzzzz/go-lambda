@@ -88,7 +88,7 @@ fi
 echo deploy target stage environment: ${stage}
 
 echo generating api
-lbuild compile api -s ${stage}
+lbuild compile api
 
 echo building...
 lbuild compile func -s ${stage}

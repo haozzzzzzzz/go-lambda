@@ -53,6 +53,13 @@ func generateApiTemplate(lambdaFunc *LambdaFunction) (err error) {
 		return
 	}
 
+	// 建立本地api测试main文件
+	err = generateApiLocalTemplate(lambdaFunc)
+	if nil != err {
+		logrus.Errorf("generate api local template failed. %s.", err)
+		return
+	}
+
 	return
 }
 
