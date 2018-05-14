@@ -1,6 +1,8 @@
 package dynamodb
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -61,5 +63,29 @@ func (m *DynamoDBTable) Query(input *dynamodb.QueryInput, records interface{}) (
 		logrus.Errorf("unmarshal items failed. %s.", err)
 		return
 	}
+	return
+}
+
+func (m *DynamoDBTable) IncrCounter(key map[string]*dynamodb.AttributeValue, fieldName string, incrNum uint32) (err error) {
+	output, err := m.Client.UpdateItem(&dynamodb.UpdateItemInput{
+		TableName:        aws.String(m.TableName),
+		Key:              key,
+		UpdateExpression: aws.String("ADD #field :incr"),
+		ExpressionAttributeNames: map[string]*string{
+			"#field": aws.String(fieldName),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":incr": {
+				N: aws.String(fmt.Sprintf("%d", incrNum)),
+			},
+		},
+		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
+	})
+	if nil != err {
+		logrus.Errorf("update counter failed. %s.", err)
+		return
+	}
+
+	fmt.Println(output)
 	return
 }
