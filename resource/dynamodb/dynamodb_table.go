@@ -2,6 +2,7 @@ package dynamodb
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -66,7 +67,7 @@ func (m *DynamoDBTable) Query(input *dynamodb.QueryInput, records interface{}) (
 	return
 }
 
-func (m *DynamoDBTable) IncrCounter(key map[string]*dynamodb.AttributeValue, fieldName string, incrNum uint32) (err error) {
+func (m *DynamoDBTable) IncrCounter(key map[string]*dynamodb.AttributeValue, fieldName string, incrNum uint32) (newNum uint32, err error) {
 	output, err := m.Client.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName:        aws.String(m.TableName),
 		Key:              key,
@@ -86,6 +87,13 @@ func (m *DynamoDBTable) IncrCounter(key map[string]*dynamodb.AttributeValue, fie
 		return
 	}
 
-	fmt.Println(output)
+	attrValue := output.Attributes[fieldName]
+	newNum64, err := strconv.ParseInt(*attrValue.N, 10, 32)
+	if nil != err {
+		logrus.Errorf("parse attribute value string to int failed. %s.", err)
+		return
+	}
+
+	newNum = uint32(newNum64)
 	return
 }
