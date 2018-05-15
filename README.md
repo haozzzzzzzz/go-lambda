@@ -421,7 +421,16 @@ var GetUser ginbuilder.HandleFunc = ginbuilder.HandleFunc{
 
 
 
-然后运行`./deploy.sh`将程序编译部署至aws云，进入Lambda控制台查看dynamodb访问权限已自动加上。
+然后运行`./deploy.sh [阶段名]`将程序编译部署至aws云，进入Lambda控制台查看dynamodb访问权限已自动加上。
+
+```shel
+./deploy.sh dev #发布到dev阶段
+./deploy.sh test #发布到test阶段
+./deploy.sh pre #发布到pre阶段
+./deploy.sh prod #发布到prod阶段
+```
+
+
 
 ![image-20180428143027031](./readmerc/image-20180428143027031.png)
 

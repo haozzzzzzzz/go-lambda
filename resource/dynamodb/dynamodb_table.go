@@ -12,12 +12,13 @@ import (
 
 type DynamoDBTable struct {
 	TableName string
+	Ctx       aws.Context
 	Client    *dynamodb.DynamoDB
 }
 
 func (m *DynamoDBTable) GetItem(input *dynamodb.GetItemInput, item interface{}) (err error) {
 	input.TableName = aws.String(m.TableName)
-	getOutput, err := m.Client.GetItem(input)
+	getOutput, err := m.Client.GetItemWithContext(m.Ctx, input)
 	if nil != err {
 		logrus.Errorf("get output failed. %s.", err)
 		return
@@ -39,7 +40,7 @@ func (m *DynamoDBTable) PutItem(item interface{}) (err error) {
 		return
 	}
 
-	_, err = m.Client.PutItem(&dynamodb.PutItemInput{
+	_, err = m.Client.PutItemWithContext(m.Ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(m.TableName),
 		Item:      attributeValue,
 	})
@@ -53,7 +54,7 @@ func (m *DynamoDBTable) PutItem(item interface{}) (err error) {
 
 func (m *DynamoDBTable) Query(input *dynamodb.QueryInput, records interface{}) (err error) {
 	input.TableName = aws.String(m.TableName)
-	output, err := m.Client.Query(input)
+	output, err := m.Client.QueryWithContext(m.Ctx, input)
 	if nil != err {
 		logrus.Errorf("query items failed. %s.", err)
 		return
@@ -68,7 +69,7 @@ func (m *DynamoDBTable) Query(input *dynamodb.QueryInput, records interface{}) (
 }
 
 func (m *DynamoDBTable) IncrCounter(key map[string]*dynamodb.AttributeValue, fieldName string, incrNum uint32) (newNum uint32, err error) {
-	output, err := m.Client.UpdateItem(&dynamodb.UpdateItemInput{
+	output, err := m.Client.UpdateItemWithContext(m.Ctx, &dynamodb.UpdateItemInput{
 		TableName:        aws.String(m.TableName),
 		Key:              key,
 		UpdateExpression: aws.String("ADD #field :incr"),
