@@ -16,15 +16,15 @@ type DynamoDBTable struct {
 	Client    *dynamodb.DynamoDB
 }
 
-func (m *DynamoDBTable) GetItem(input *dynamodb.GetItemInput, item interface{}) (err error) {
+func (m *DynamoDBTable) GetItem(input *dynamodb.GetItemInput, item interface{}) (output *dynamodb.GetItemOutput, err error) {
 	input.TableName = aws.String(m.TableName)
-	getOutput, err := m.Client.GetItemWithContext(m.Ctx, input)
+	output, err = m.Client.GetItemWithContext(m.Ctx, input)
 	if nil != err {
 		logrus.Errorf("get output failed. %s.", err)
 		return
 	}
 
-	err = dynamodbattribute.UnmarshalMap(getOutput.Item, item)
+	err = dynamodbattribute.UnmarshalMap(output.Item, item)
 	if nil != err {
 		logrus.Errorf("unmarshal item failed. %s.", err)
 		return
