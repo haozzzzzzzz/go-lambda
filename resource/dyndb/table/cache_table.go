@@ -5,9 +5,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	dynamodb2 "github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/haozzzzzzzz/go-lambda/resource/dynamodb"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,7 +18,7 @@ type CacheModel struct {
 }
 
 type CacheTable struct {
-	dynamodb.DynamoDBTable
+	DynamoDBTable
 }
 
 func (m *CacheTable) SetNx(key string, obj interface{}, expireAt int64) (success bool, err error) {
@@ -28,7 +27,7 @@ func (m *CacheTable) SetNx(key string, obj interface{}, expireAt int64) (success
 		Record:   obj,
 		ExpireAt: expireAt,
 	})
-	output, err := m.Client.PutItemWithContext(m.Ctx, &dynamodb2.PutItemInput{
+	output, err := m.Client.PutItemWithContext(m.Ctx, &dynamodb.PutItemInput{
 		TableName:           aws.String(m.TableName),
 		Item:                attributeValue,
 		ConditionExpression: aws.String("attribute_not_exists(key)"), // 做到这里
@@ -48,8 +47,8 @@ func (m *CacheTable) SetNxTTL(key string, obj interface{}, ttl time.Duration) (b
 }
 
 func (m *CacheTable) Get(key string, obj interface{}) (err error) {
-	err = m.GetItem(&dynamodb2.GetItemInput{
-		Key: map[string]*dynamodb2.AttributeValue{
+	err = m.GetItem(&dynamodb.GetItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
 			"key": {
 				S: aws.String(key),
 			},
@@ -65,9 +64,9 @@ func (m *CacheTable) Get(key string, obj interface{}) (err error) {
 }
 
 func (m *CacheTable) Delete(key string) (err error) {
-	_, err = m.Client.DeleteItem(&dynamodb2.DeleteItemInput{
+	_, err = m.Client.DeleteItem(&dynamodb.DeleteItemInput{
 		TableName: aws.String(m.TableName),
-		Key: map[string]*dynamodb2.AttributeValue{
+		Key: map[string]*dynamodb.AttributeValue{
 			"key": {
 				S: aws.String(key),
 			},

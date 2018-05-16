@@ -1,4 +1,4 @@
-package dynamodb
+package dyndb
 
 import (
 	"github.com/aws/aws-sdk-go/aws"

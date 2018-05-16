@@ -2,8 +2,7 @@ package table
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	dynamodb2 "github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/haozzzzzzzz/go-lambda/resource/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 // 计数器
@@ -13,11 +12,11 @@ type CounterModel struct {
 }
 
 type CounterTable struct {
-	dynamodb.DynamoDBTable
+	DynamoDBTable
 }
 
 func (m *CounterTable) Incr(name string, incrNum uint32) (newNum uint32, err error) {
-	return m.IncrCounter(map[string]*dynamodb2.AttributeValue{
+	return m.IncrCounter(map[string]*dynamodb.AttributeValue{
 		"name": {
 			S: aws.String(name),
 		},
