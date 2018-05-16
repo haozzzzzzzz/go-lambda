@@ -10,17 +10,35 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type DynamoDBTableError struct {
+	Message string `json:"message"`
+}
+
+func (m *DynamoDBTableError) Error() string {
+	return m.Message
+}
+
+var NilItem = &DynamoDBTableError{
+	Message: "nil table item",
+}
+
 type DynamoDBTable struct {
 	TableName string
 	Ctx       aws.Context
 	Client    *dynamodb.DynamoDB
 }
 
-func (m *DynamoDBTable) GetItem(input *dynamodb.GetItemInput, item interface{}) (output *dynamodb.GetItemOutput, err error) {
+func (m *DynamoDBTable) GetItem(input *dynamodb.GetItemInput, item interface{}) (err error) {
 	input.TableName = aws.String(m.TableName)
-	output, err = m.Client.GetItemWithContext(m.Ctx, input)
+	output, err := m.Client.GetItemWithContext(m.Ctx, input)
 	if nil != err {
 		logrus.Errorf("get output failed. %s.", err)
+		return
+	}
+
+	// 没有记录
+	if len(output.Item) == 0 {
+		err = NilItem
 		return
 	}
 

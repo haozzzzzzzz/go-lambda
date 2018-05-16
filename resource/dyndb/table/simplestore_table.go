@@ -23,7 +23,7 @@ func (m *SimpleStoreTable) AddSimpleStore(obj *SimpleStoreModel) (err error) {
 
 func (m *SimpleStoreTable) GetSimpleStore(partitionKey string, sortKey string) (obj *SimpleStoreModel, err error) {
 	obj = &SimpleStoreModel{}
-	_, err = m.GetItem(&dynamodb.GetItemInput{
+	err = m.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(m.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"partition_key": {
@@ -38,6 +38,7 @@ func (m *SimpleStoreTable) GetSimpleStore(partitionKey string, sortKey string) (
 		logrus.Errorf("get simple store item failed. %s.", err)
 		return
 	}
+
 	return
 }
 

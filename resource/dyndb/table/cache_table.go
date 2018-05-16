@@ -47,7 +47,7 @@ func (m *CacheTable) SetNxTTL(key string, obj interface{}, ttl time.Duration) (b
 }
 
 func (m *CacheTable) Get(key string, obj interface{}) (err error) {
-	_, err = m.GetItem(&dynamodb.GetItemInput{
+	err = m.GetItem(&dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"key": {
 				S: aws.String(key),
