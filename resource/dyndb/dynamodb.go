@@ -26,3 +26,9 @@ func GetDynamodb(region string) (db *dynamodb.DynamoDB, err error) {
 	xray.AWS(db.Client)
 	return
 }
+
+func GetDynamoDB(ses *session.Session) (db *dynamodb.DynamoDB) {
+	db = dynamodb.New(ses)
+	xray.AWS(db.Client)
+	return
+}
