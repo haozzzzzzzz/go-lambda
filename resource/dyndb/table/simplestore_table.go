@@ -23,7 +23,7 @@ func (m *SimpleStoreTable) AddSimpleStore(obj *SimpleStoreModel) (err error) {
 
 func (m *SimpleStoreTable) GetSimpleStore(partitionKey string, sortKey string) (obj *SimpleStoreModel, err error) {
 	obj = &SimpleStoreModel{}
-	err = m.GetItem(&dynamodb.GetItemInput{
+	_, err = m.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(m.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"partition_key": {
