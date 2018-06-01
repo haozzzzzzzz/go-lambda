@@ -86,6 +86,7 @@ func (m *DynamoDBTable) Query(input *dynamodb.QueryInput, records interface{}) (
 	return
 }
 
+// 增加计数
 func (m *DynamoDBTable) IncrCounter(key map[string]*dynamodb.AttributeValue, fieldName string, incrNum uint32) (newNum uint32, err error) {
 	output, err := m.Client.UpdateItemWithContext(m.Ctx, &dynamodb.UpdateItemInput{
 		TableName:        aws.String(m.TableName),
