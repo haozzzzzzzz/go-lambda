@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/haozzzzzzzz/go-lambda/tool/lambda-deploy/cmd"
+import "github.com/haozzzzzzzz/go-lambda/tools/lambda-build/cmd"
 
 func main() {
 	cmd.Execute()

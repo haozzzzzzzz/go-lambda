@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/haozzzzzzzz/go-lambda/proj"
+	"github.com/haozzzzzzzz/go-rapid-development/utils/str"
 	time2 "github.com/haozzzzzzzz/go-rapid-development/utils/time"
-	"github.com/serenize/snaker.git"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -91,7 +91,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	}
 
 	strDayStartTime := time2.DateStringFormat(dayStartTime)
-	snakeLambdaFunctionName := fmt.Sprintf("%s-%s", snaker.CamelToSnake(projectConfig.Name), m.Stage)
+	snakeLambdaFunctionName := fmt.Sprintf("%s-%s", str.SnakeString(projectConfig.Name), m.Stage)
 	snakeLambdaFunctionName = strings.Replace(snakeLambdaFunctionName, "_", "-", -1)
 	s3Prefix := fmt.Sprintf("%s/%s", snakeLambdaFunctionName, strDayStartTime)
 	_, err = awsYamlFile.RunAWSCliCommand(
