@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/yaml"
 	"github.com/sirupsen/logrus"
@@ -21,7 +22,6 @@ type AuthorizerConfig struct {
 	ProjectYamlFile         *ProjectYamlFile
 	AuthorizerYamlFile      *AuthorizerYamlFile
 	AuthorizerYamlFileExsit bool
-	Mode                    os.FileMode
 }
 
 func NewAuthorizerConfigFromProjPath(projPath string) (config *AuthorizerConfig, err error) {
@@ -54,7 +54,6 @@ func NewAuthorizerConfig(projYamlFile *ProjectYamlFile) (config *AuthorizerConfi
 		ConfigFilePath:          fmt.Sprintf("%s/.proj/%s", projPath, AuthorizerFileName),
 		AuthorizerYamlFile:      NewAuthorizerYamlFile(),
 		AuthorizerYamlFileExsit: false,
-		Mode: projYamlFile.Mode,
 	}
 
 	config.Load()
@@ -76,7 +75,7 @@ func (m *AuthorizerConfig) Load() (err error) {
 }
 
 func (m *AuthorizerConfig) Save() (err error) {
-	err = yaml.WriteYamlToFile(m.ConfigFilePath, m.AuthorizerYamlFile, m.Mode)
+	err = yaml.WriteYamlToFile(m.ConfigFilePath, m.AuthorizerYamlFile, project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write authorizer %q failed. %s.", m.ConfigFilePath, err)
 		return

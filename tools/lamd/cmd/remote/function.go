@@ -65,7 +65,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 
 	projectPath := m.ProjectPath
 	// read aws config
-	awsYamlFile, _, err := proj.CheckAWSYamlFile(projectPath, os.ModePerm, false)
+	awsYamlFile, _, err := proj.CheckAWSYamlFile(projectPath, false)
 	if nil != err {
 		logrus.Errorf("check aws yaml file failed. \n%s.", err)
 		return

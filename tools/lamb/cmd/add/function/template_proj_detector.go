@@ -5,20 +5,20 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/sirupsen/logrus"
 )
 
 func generateDetectorMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 	detectorDir := fmt.Sprintf("%s/.proj/detector", lambdaFunc.ProjectPath)
-	mode := lambdaFunc.Mode
-	err = os.MkdirAll(detectorDir, mode)
+	err = os.MkdirAll(detectorDir, project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("make dir %q failed. \n%s.", detectorDir, err)
 		return
 	}
 
 	detectorFilePath := fmt.Sprintf("%s/main.go", detectorDir)
-	err = ioutil.WriteFile(detectorFilePath, []byte(detectorMainGoFileText), mode)
+	err = ioutil.WriteFile(detectorFilePath, []byte(detectorMainGoFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write %q failed. \n%s.", detectorFilePath, err)
 		return

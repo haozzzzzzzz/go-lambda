@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/haozzzzzzzz/go-rapid-development/cmd"
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -66,7 +67,7 @@ func (m *CompileFunction) Run() (err error) {
 	}
 
 	// read AWS yaml file
-	m.AWSYamlFile, _, err = proj.CheckAWSYamlFile(m.ProjectPath, m.ProjectYamlFile.Mode, false)
+	m.AWSYamlFile, _, err = proj.CheckAWSYamlFile(m.ProjectPath, false)
 	if nil != err {
 		logrus.Errorf("check aws yaml file failed. \n%s.", err)
 		return
@@ -116,7 +117,7 @@ func (m *CompileFunction) runGoBuild() (err error) {
 	mainFile := fmt.Sprintf("%s/main.go", projPath)
 
 	stageDeployFolder := fmt.Sprintf("%s/deploy/%s", projPath, m.Stage)
-	err = os.MkdirAll(stageDeployFolder, m.ProjectYamlFile.Mode)
+	err = os.MkdirAll(stageDeployFolder, project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("make stage deploy folder failed. %s.", err)
 		return
@@ -206,7 +207,7 @@ func (m *CompileFunction) zipPackage() (err error) {
 	gitIgnoreFilePath := fmt.Sprintf("%s/.gitignore", zipWorkPath)
 	if !file.PathExists(gitIgnoreFilePath) {
 		gitIgnoreFileText := zipFileName
-		err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), projConfig.Mode)
+		err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), project.ProjectFileMode)
 		if nil != err {
 			logrus.Errorf("write %q failed. %s.", gitIgnoreFilePath, err)
 			return

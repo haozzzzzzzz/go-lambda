@@ -3,8 +3,8 @@ package proj
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -16,7 +16,6 @@ type SAMTemplateConfig struct {
 	AWSYamlFile         *AWSYamlFile
 	SAMTemplateYamlFile *SAMTemplateYamlFile
 	LambdaFunctionName  string
-	Mode                os.FileMode
 }
 
 func NewSAMTempalteConfig(stage string, projConfig *ProjectYamlFile, awsConfig *AWSYamlFile) (config *SAMTemplateConfig, err error) {
@@ -27,7 +26,6 @@ func NewSAMTempalteConfig(stage string, projConfig *ProjectYamlFile, awsConfig *
 		AWSYamlFile:         awsConfig,
 		SAMTemplateYamlFile: NewSAMTemplateYamlFile(),
 		LambdaFunctionName:  fmt.Sprintf("%s%s", projConfig.Name, stage),
-		Mode:                projConfig.Mode,
 	}
 
 	err = config.Build()
@@ -92,7 +90,6 @@ func (m *SAMTemplateConfig) Build() (err error) {
 func (m *SAMTemplateConfig) Save() (err error) {
 	stage := m.State
 	projectPath := m.ProjectPath
-	mode := m.Mode
 
 	samYamlFilePath := fmt.Sprintf("%s/deploy/%s/template.yaml", projectPath, stage)
 	byteYaml, err := yaml.Marshal(m.SAMTemplateYamlFile)
@@ -101,7 +98,7 @@ func (m *SAMTemplateConfig) Save() (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(samYamlFilePath, byteYaml, mode)
+	err = ioutil.WriteFile(samYamlFilePath, byteYaml, project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write sam yaml file failed. \n%s.", err)
 		return

@@ -3,8 +3,8 @@ package proj
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -17,6 +17,7 @@ const (
 	CustomEvent               LambdaFunctionEventSourceType = 1 // 自定义事件
 	ApiGatewayProxyEvent      LambdaFunctionEventSourceType = 2 // API GATEWAY AWS Proxy事件
 	ApiGatewayAuthorizerEvent LambdaFunctionEventSourceType = 3 // API GATEWAY 授权校验事件
+	SNSEvent                  LambdaFunctionEventSourceType = 4 // SNS event
 )
 
 func NewLambdaFunctionEventSourceType(strEvent string) LambdaFunctionEventSourceType {
@@ -29,6 +30,8 @@ func NewLambdaFunctionEventSourceType(strEvent string) LambdaFunctionEventSource
 		return ApiGatewayAuthorizerEvent
 	case BasicExecutionEvent.String():
 		return BasicExecutionEvent
+	case SNSEvent.String():
+		return SNSEvent
 	default:
 		logrus.Fatal("unsupported event")
 	}
@@ -43,6 +46,9 @@ func (m LambdaFunctionEventSourceType) String() string {
 		return "ApiGatewayProxyEvent"
 	case ApiGatewayAuthorizerEvent:
 		return "ApiGatewayAuthorizerEvent"
+	case SNSEvent:
+		return "SNSEvent"
+
 	case BasicExecutionEvent:
 		fallthrough
 	default:
@@ -58,7 +64,6 @@ type ProjectYamlFile struct {
 	Description     string                        `yaml:"description"`
 	ProjectPath     string                        `json:"project_path" yaml:"project_path"`
 	EventSourceType LambdaFunctionEventSourceType `yaml:"event_source_type"`
-	Mode            os.FileMode                   `json:"mode" yaml:"mode"`
 }
 
 func (m *ProjectYamlFile) Save() (err error) {
@@ -68,7 +73,7 @@ func (m *ProjectYamlFile) Save() (err error) {
 		logrus.Errorf("marshal proj yaml config file failed. \n%s.", err)
 		return
 	}
-	err = ioutil.WriteFile(projYamlFileName, byteProjYamlFile, m.Mode)
+	err = ioutil.WriteFile(projYamlFileName, byteProjYamlFile, project.ProjectFileMode)
 	if nil != err {
 		logrus.Warnf("write .proj/proj.yaml failed. \n%s.", err)
 		return

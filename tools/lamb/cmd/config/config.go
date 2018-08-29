@@ -1,7 +1,6 @@
 package config
 
 import (
-	"os"
 	"path/filepath"
 
 	"github.com/haozzzzzzzz/go-lambda/proj"
@@ -27,7 +26,7 @@ func CommandConfig() *cobra.Command {
 				return
 			}
 
-			_, _, err = proj.CheckAWSYamlFile(projectPath, os.ModePerm, true)
+			_, _, err = proj.CheckAWSYamlFile(projectPath, true)
 			if nil != err {
 				logrus.Errorf("check yaml file failed. \n%s.", err)
 				return

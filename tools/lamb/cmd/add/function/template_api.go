@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/haozzzzzzzz/go-rapid-development/web/ginbuilder/api"
 	"github.com/sirupsen/logrus"
 )
@@ -12,7 +13,7 @@ import (
 func generateApiTemplate(lambdaFunc *LambdaFunction) (err error) {
 	// add handler
 	apigatewayFileName := fmt.Sprintf("%s/handler/handler_apigateway.go", lambdaFunc.ProjectPath)
-	err = ioutil.WriteFile(apigatewayFileName, []byte(apigatewayFileText), lambdaFunc.Mode)
+	err = ioutil.WriteFile(apigatewayFileName, []byte(apigatewayFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write handler/apigateway.go failed. \n%s.", err)
 		return
@@ -20,14 +21,14 @@ func generateApiTemplate(lambdaFunc *LambdaFunction) (err error) {
 
 	// api
 	apiDir := fmt.Sprintf("%s/api", lambdaFunc.ProjectPath)
-	err = os.MkdirAll(apiDir, lambdaFunc.Mode)
+	err = os.MkdirAll(apiDir, project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("make project api directory failed. \n%s.", err)
 		return
 	}
 
 	routersFileName := fmt.Sprintf("%s/routers.go", apiDir)
-	err = ioutil.WriteFile(routersFileName, []byte(routersFileText), lambdaFunc.Mode)
+	err = ioutil.WriteFile(routersFileName, []byte(routersFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write api/routers.go failed. \n%s.", err)
 		return
@@ -35,7 +36,7 @@ func generateApiTemplate(lambdaFunc *LambdaFunction) (err error) {
 
 	// 建立一个api示例
 	metricDir := fmt.Sprintf("%s/metric", apiDir)
-	err = os.MkdirAll(metricDir, lambdaFunc.Mode)
+	err = os.MkdirAll(metricDir, project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("make api example \"metric\" directory failed. \n%s.", err)
 		return

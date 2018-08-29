@@ -6,12 +6,13 @@ import (
 	"os"
 
 	"github.com/haozzzzzzzz/go-lambda/proj"
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/sirupsen/logrus"
 )
 
 func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 	innerProjDir := fmt.Sprintf("%s/.proj/", lambdaFunc.ProjectPath)
-	err = os.MkdirAll(innerProjDir, lambdaFunc.Mode)
+	err = os.MkdirAll(innerProjDir, project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("make project proj folder failed. \n%s.", err)
 		return
@@ -19,14 +20,14 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 
 	// create secret folder
 	secretDir := fmt.Sprintf("%s/secret", innerProjDir)
-	err = os.MkdirAll(secretDir, lambdaFunc.Mode)
+	err = os.MkdirAll(secretDir, project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("make project secret folder failed. \n%s.", err)
 		return
 	}
 
 	// create .gitignore
-	err = ioutil.WriteFile(fmt.Sprintf("%s/.gitignore", innerProjDir), []byte("secret"), lambdaFunc.Mode)
+	err = ioutil.WriteFile(fmt.Sprintf("%s/.gitignore", innerProjDir), []byte("secret"), project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("add project .gitignore file failed. \n%s.", err)
 		return
@@ -38,7 +39,6 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 		Description:     lambdaFunc.Description,
 		ProjectPath:     lambdaFunc.ProjectPath,
 		EventSourceType: lambdaFunc.EventSourceType,
-		Mode:            lambdaFunc.Mode,
 	}
 	err = projYamlConfig.Save()
 	if nil != err {
@@ -47,7 +47,7 @@ func generateProjTemplate(lambdaFunc *LambdaFunction) (err error) {
 	}
 
 	// check aws file
-	_, _, err = proj.CheckAWSYamlFile(lambdaFunc.ProjectPath, lambdaFunc.Mode, true)
+	_, _, err = proj.CheckAWSYamlFile(lambdaFunc.ProjectPath, true)
 	if nil != err {
 		logrus.Errorf("check aws yaml file failed. \n%s.", err)
 		return

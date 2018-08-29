@@ -8,26 +8,26 @@ import (
 	"strings"
 
 	"github.com/haozzzzzzzz/go-rapid-development/cmd"
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
 type AWSYamlFile struct {
-	AccountId    string      `yaml:"account_id"`
-	AccessKey    string      `yaml:"access_key"`
-	SecretKey    string      `yaml:"secret_key"`
-	Region       string      `yaml:"region"`
-	OutputFormat string      `yaml:"output_format"`
-	Role         string      `yaml:"role"`
-	CodeS3Bucket string      `yaml:"code_s3_bucket"`
-	Mode         os.FileMode `yaml:"mode"`
+	AccountId    string `yaml:"account_id"`
+	AccessKey    string `yaml:"access_key"`
+	SecretKey    string `yaml:"secret_key"`
+	Region       string `yaml:"region"`
+	OutputFormat string `yaml:"output_format"`
+	Role         string `yaml:"role"`
+	CodeS3Bucket string `yaml:"code_s3_bucket"`
 }
 
 func (m *AWSYamlFile) Save(projectPath string) (err error) {
 	awsYamlFileDir := fmt.Sprintf("%s/.proj/secret", projectPath)
 	if !file.PathExists(awsYamlFileDir) {
-		err = os.MkdirAll(awsYamlFileDir, m.Mode)
+		err = os.MkdirAll(awsYamlFileDir, project.ProjectDirMode)
 		if nil != err {
 			logrus.Errorf("make project secret directory failed. \n%s.", err)
 			return
@@ -41,7 +41,7 @@ func (m *AWSYamlFile) Save(projectPath string) (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(awsYamlFilePath, byteYaml, m.Mode)
+	err = ioutil.WriteFile(awsYamlFilePath, byteYaml, project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write aws yaml file failed. \n%s.", err)
 		return
@@ -68,7 +68,7 @@ func LoadAWSYamlFile(projectPath string) (yamlFile *AWSYamlFile, err error) {
 	return
 }
 
-func CheckAWSYamlFile(projectPath string, mode os.FileMode, overwrite bool) (awsYamlFile *AWSYamlFile, exist bool, err error) {
+func CheckAWSYamlFile(projectPath string, overwrite bool) (awsYamlFile *AWSYamlFile, exist bool, err error) {
 	awsYamlFilePath := fmt.Sprintf("%s/.proj/secret/aws.yaml", projectPath)
 	if file.PathExists(awsYamlFilePath) {
 		exist = true
@@ -84,9 +84,7 @@ func CheckAWSYamlFile(projectPath string, mode os.FileMode, overwrite bool) (aws
 		}
 
 	} else {
-		awsYamlFile = &AWSYamlFile{
-			Mode: mode,
-		}
+		awsYamlFile = &AWSYamlFile{}
 	}
 
 	inputReader := bufio.NewReader(os.Stdin)

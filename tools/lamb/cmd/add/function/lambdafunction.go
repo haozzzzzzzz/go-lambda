@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"syscall"
 
 	"github.com/go-playground/validator"
 	"github.com/haozzzzzzzz/go-lambda/proj"
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/haozzzzzzzz/go-rapid-development/tools/goimports"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
 	"github.com/sirupsen/logrus"
@@ -19,7 +19,6 @@ import (
 // 添加lambda函数命令
 func CommandAddLambdaFunction() *cobra.Command {
 	var handler LambdaFunction
-	handler.Mode = os.ModePerm
 	var eventType string
 	var cmd = &cobra.Command{
 		Use:   "func",
@@ -45,22 +44,14 @@ func CommandAddLambdaFunction() *cobra.Command {
 
 // 添加Lambda函数命令处理器
 type LambdaFunction struct {
-	Name            string      `json:"name" validate:"required"`
-	Description     string      `yaml:"description"`
-	Path            string      `json:"path" validate:"required"`
-	Mode            os.FileMode `json:"mode" validate:"required"`
-	ProjectPath     string      `json:"project_path"`
+	Name            string `json:"name" validate:"required"`
+	Description     string `yaml:"description"`
+	Path            string `json:"path" validate:"required"`
+	ProjectPath     string `json:"project_path"`
 	EventSourceType proj.LambdaFunctionEventSourceType
 }
 
 func (m *LambdaFunction) Run() (err error) {
-	/**
-	这并不是Go的Bug，包括Linux系统调用都是这样的，创建目录除了给定的权限还要加上系统的Umask，Go也是如实遵循这种约定。
-	Umask是权限的补码,用于设置创建文件和文件夹默认权限的,一般在 /etc/profile中或 $HOME/profile或 $HOME/.bash_profile中
-	*/
-	mask := syscall.Umask(0)
-	defer syscall.Umask(mask)
-
 	dir, err := filepath.Abs(m.Path)
 	if nil != err {
 		logrus.Errorf("get absolute file path failed. \n%s.", err)
@@ -93,9 +84,8 @@ func (m *LambdaFunction) Run() (err error) {
 		}
 	}
 
-	mode := m.Mode
 	// project root
-	err = os.MkdirAll(m.ProjectPath, mode)
+	err = os.MkdirAll(m.ProjectPath, project.ProjectDirMode)
 	if nil != err {
 		logrus.Errorf("make project directory failed. \n%s.", err)
 		return
@@ -129,8 +119,6 @@ func (m *LambdaFunction) Run() (err error) {
 	}
 
 	switch m.EventSourceType {
-	case proj.BasicExecutionEvent:
-	case proj.CustomEvent:
 	case proj.ApiGatewayProxyEvent:
 		err = generateApiTemplate(m)
 		if nil != err {

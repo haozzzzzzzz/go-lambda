@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/sirupsen/logrus"
 )
 
@@ -11,7 +12,7 @@ func generateApiGatewayAuthorizer(lambdaFunc *LambdaFunction) (err error) {
 	projectPath := lambdaFunc.ProjectPath
 	// add handler
 	authorizerFilePath := fmt.Sprintf("%s/handler/handler_apigatewayauthorizer.go", projectPath)
-	err = ioutil.WriteFile(authorizerFilePath, []byte(authorizerFileText), lambdaFunc.Mode)
+	err = ioutil.WriteFile(authorizerFilePath, []byte(authorizerFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write %q file failed. %s", err)
 		return

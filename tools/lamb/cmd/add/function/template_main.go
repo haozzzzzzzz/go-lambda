@@ -5,17 +5,16 @@ import (
 	"io/ioutil"
 
 	"github.com/haozzzzzzzz/go-lambda/proj"
+	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/sirupsen/logrus"
 )
 
 func generateMainTemplate(lambdaFunc *LambdaFunction) (err error) {
 	projectPath := lambdaFunc.ProjectPath
-	mode := lambdaFunc.Mode
-
 	// main.go
 	newMainFileText := mainFileText
 	mainGoFileName := fmt.Sprintf("%s/main.go", projectPath)
-	err = ioutil.WriteFile(mainGoFileName, []byte(newMainFileText), mode)
+	err = ioutil.WriteFile(mainGoFileName, []byte(newMainFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write %q failed. \n%s.", mainGoFileName, err)
 		return
@@ -33,7 +32,7 @@ main
 `
 	gitIgnoreFileText = fmt.Sprintf(gitIgnoreFileText, lambdaFuncName, lambdaFuncName, lambdaFuncName, lambdaFuncName)
 	gitIgnoreFilePath := fmt.Sprintf("%s/.gitignore", projectPath)
-	err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), mode)
+	err = ioutil.WriteFile(gitIgnoreFilePath, []byte(gitIgnoreFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write %q failed. %s.", gitIgnoreFilePath, err)
 		return
@@ -62,7 +61,6 @@ func main() {
 
 func createDeployShellFile(lambdaFunc *LambdaFunction) (err error) {
 	projectPath := lambdaFunc.ProjectPath
-	mode := lambdaFunc.Mode
 	var deployShellFileText string
 	var runShellFileText string
 
@@ -115,17 +113,17 @@ fi
 echo deploy target stage environment: ${stage}
 
 echo building...
-lbuild compile func -s ${stage}
+lamb compile func -s ${stage}
 
 echo deploying...
-ldeploy remote func -s ${stage}
+lamd remote func -s ${stage}
 `
 
 	}
 
 	// run.sh
 	runShellFilePath := fmt.Sprintf("%s/run.sh", projectPath)
-	err = ioutil.WriteFile(runShellFilePath, []byte(runShellFileText), mode)
+	err = ioutil.WriteFile(runShellFilePath, []byte(runShellFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write %q failed. \n%s.", runShellFilePath, err)
 		return
@@ -133,7 +131,7 @@ ldeploy remote func -s ${stage}
 
 	// deploy.sh
 	deployShellFilePath := fmt.Sprintf("%s/deploy.sh", projectPath)
-	err = ioutil.WriteFile(deployShellFilePath, []byte(deployShellFileText), mode)
+	err = ioutil.WriteFile(deployShellFilePath, []byte(deployShellFileText), project.ProjectFileMode)
 	if nil != err {
 		logrus.Errorf("write %q failed. \n%s.", deployShellFilePath, err)
 		return
