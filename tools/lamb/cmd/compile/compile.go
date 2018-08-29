@@ -1,8 +1,8 @@
 package compile
 
 import (
-	"github.com/haozzzzzzzz/go-lambda/tools/lambda-build/cmd/compile/api"
-	"github.com/haozzzzzzzz/go-lambda/tools/lambda-build/cmd/compile/function"
+	"github.com/haozzzzzzzz/go-lambda/tools/lamb/cmd/compile/api"
+	"github.com/haozzzzzzzz/go-lambda/tools/lamb/cmd/compile/function"
 	"github.com/spf13/cobra"
 )
 

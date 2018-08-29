@@ -1,8 +1,8 @@
 package add
 
 import (
-	"github.com/haozzzzzzzz/go-lambda/tools/lambda-build/cmd/add/authorizer"
-	"github.com/haozzzzzzzz/go-lambda/tools/lambda-build/cmd/add/function"
+	"github.com/haozzzzzzzz/go-lambda/tools/lamb/cmd/add/authorizer"
+	"github.com/haozzzzzzzz/go-lambda/tools/lamb/cmd/add/function"
 	"github.com/spf13/cobra"
 )
 

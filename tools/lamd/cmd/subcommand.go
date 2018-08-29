@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/haozzzzzzzz/go-lambda/tools/lambda-deploy/cmd/remote"
+	"github.com/haozzzzzzzz/go-lambda/tools/lamd/cmd/remote"
 )
 
 func init() {
