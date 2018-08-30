@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"os"
+
 	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/sirupsen/logrus"
@@ -123,7 +125,7 @@ lamd remote func -s ${stage}
 
 	// run.sh
 	runShellFilePath := fmt.Sprintf("%s/run.sh", projectPath)
-	err = ioutil.WriteFile(runShellFilePath, []byte(runShellFileText), project.ProjectFileMode)
+	err = ioutil.WriteFile(runShellFilePath, []byte(runShellFileText), os.ModePerm)
 	if nil != err {
 		logrus.Errorf("write %q failed. \n%s.", runShellFilePath, err)
 		return
@@ -131,7 +133,7 @@ lamd remote func -s ${stage}
 
 	// deploy.sh
 	deployShellFilePath := fmt.Sprintf("%s/deploy.sh", projectPath)
-	err = ioutil.WriteFile(deployShellFilePath, []byte(deployShellFileText), project.ProjectFileMode)
+	err = ioutil.WriteFile(deployShellFilePath, []byte(deployShellFileText), os.ModePerm)
 	if nil != err {
 		logrus.Errorf("write %q failed. \n%s.", deployShellFilePath, err)
 		return

@@ -135,6 +135,10 @@ func (m *Role) AddXRayPolicy() {
 	m.AddPolicy(policy)
 }
 
+func (m *Role) AddSNSPolicy() {
+
+}
+
 func NewExecutionRole(roleName string) (role *Role) {
 	role = &Role{}
 	role.Properties.RoleName = roleName
@@ -176,6 +180,8 @@ func NewExecutionRole(roleName string) (role *Role) {
 			role.AddKinesisPolicy()
 		case resource.XRayResourceType:
 			role.AddXRayPolicy()
+		case resource.SNSResourceType:
+			role.AddSNSPolicy()
 		}
 	}
 

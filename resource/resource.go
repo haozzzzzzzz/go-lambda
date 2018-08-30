@@ -6,6 +6,7 @@ const (
 	DynamoDBResourceType ResourceType = 1
 	KinesisResourceType  ResourceType = 2
 	XRayResourceType     ResourceType = 3
+	SNSResourceType      ResourceType = 4
 )
 
 // 在使用中的资源

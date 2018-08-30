@@ -97,13 +97,6 @@ func (m *LambdaFunction) Run() (err error) {
 		return
 	}
 
-	// config
-	err = generateConfigTemplate(m)
-	if nil != err {
-		logrus.Errorf("generate config template failed. \n%s.", err)
-		return
-	}
-
 	// constant
 	err = generateConstantTemplate(m)
 	if nil != err {

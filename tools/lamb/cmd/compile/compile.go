@@ -1,7 +1,6 @@
 package compile
 
 import (
-	"github.com/haozzzzzzzz/go-lambda/tools/lamb/cmd/compile/api"
 	"github.com/haozzzzzzzz/go-lambda/tools/lamb/cmd/compile/function"
 	"github.com/spf13/cobra"
 )
@@ -16,7 +15,6 @@ compile function --path ./`,
 	}
 
 	compileCmd.AddCommand(
-		api.CommandCompileApi(),
 		function.CommandCompileFunction(),
 	)
 

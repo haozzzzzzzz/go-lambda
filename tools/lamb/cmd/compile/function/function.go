@@ -123,27 +123,28 @@ func (m *CompileFunction) runGoBuild() (err error) {
 		return
 	}
 
-	// go run detector
-	detectorMainFile := fmt.Sprintf("%s/.proj/detector/main.go", projPath)
-	detectorMain := fmt.Sprintf("%s/detector", projPath)
-	exit, err := cmd.RunCommand("go", "build", "-v", "-o", detectorMain, detectorMainFile)
-	if nil != err || exit != 0 {
-		logrus.Errorf("build detector failed. \n%s.", err)
-		return
-	}
-
-	roleYamlFilePath := fmt.Sprintf("%s/.proj/role.yaml", projPath)
-	exit, err = cmd.RunCommand(detectorMain, "--path", roleYamlFilePath)
-	if nil != err {
-		logrus.Errorf("generate role.yaml failed. \n%s.", err)
-		return
-	}
+	// TODO detector需要改成本地检测
+	//// go run detector
+	//detectorMainFile := fmt.Sprintf("%s/.proj/detector/main.go", projPath)
+	//detectorMain := fmt.Sprintf("%s/detector", projPath)
+	//exit, err := cmd.RunCommand("go", "build", "-v", "-o", detectorMain, detectorMainFile)
+	//if nil != err || exit != 0 {
+	//	logrus.Errorf("build detector failed. \n%s.", err)
+	//	return
+	//}
+	//
+	//roleYamlFilePath := fmt.Sprintf("%s/.proj/role.yaml", projPath)
+	//exit, err = cmd.RunCommand(detectorMain, "--path", roleYamlFilePath)
+	//if nil != err {
+	//	logrus.Errorf("generate role.yaml failed. \n%s.", err)
+	//	return
+	//}
 
 	// go build
 	logrus.Info("go building binary")
 	os.Setenv("GOOS", "linux")
 	os.Setenv("GOARCH", "amd64")
-	exit, err = cmd.RunCommand("go", "build", "-v", "-o", deployTarget, mainFile)
+	exit, err := cmd.RunCommand("go", "build", "-v", "-o", deployTarget, mainFile)
 	if nil != err || exit != 0 {
 		logrus.Errorf("run go build command failed. \n%s.", err)
 		return
