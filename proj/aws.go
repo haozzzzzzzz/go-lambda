@@ -183,5 +183,5 @@ func (m *AWSYamlFile) RunAWSCliCommand(command string, args ...string) (exit int
 	os.Setenv("AWS_SECRET_ACCESS_KEY", m.SecretKey)
 	os.Setenv("AWS_DEFAULT_REGION", m.Region)
 	os.Setenv("AWS_DEFAULT_OUTPUT", m.OutputFormat)
-	return cmd.RunCommand(command, args...)
+	return cmd.RunCommand("./", command, args...)
 }
