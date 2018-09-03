@@ -5,7 +5,7 @@ type StageType int8
 const (
 	DevStage  StageType = 1 // 开发
 	TestStage StageType = 2 // 测试
-	PreStage  StageType = 3
+	PreStage  StageType = 3 // 预发布
 	ProdStage StageType = 4 // 正式
 )
 

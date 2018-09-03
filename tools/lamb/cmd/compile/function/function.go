@@ -11,6 +11,7 @@ import (
 	"github.com/haozzzzzzzz/go-rapid-development/cmd"
 	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/file"
+	"github.com/haozzzzzzzz/go-rapid-development/utils/str"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -112,7 +113,7 @@ func (m *CompileFunction) Run() (err error) {
 func (m *CompileFunction) runGoBuild() (err error) {
 	projConfig := m.ProjectYamlFile
 	projPath := projConfig.ProjectPath
-	lambdaFuncName := fmt.Sprintf("%s%s", projConfig.Name, m.Stage)
+	lambdaFuncName := fmt.Sprintf("%s%s", str.CamelString(m.Stage), projConfig.Name)
 	deployTarget := fmt.Sprintf("%s/%s", projPath, lambdaFuncName)
 	mainFile := fmt.Sprintf("%s/main.go", projPath)
 
@@ -191,7 +192,7 @@ func (m *CompileFunction) copyConfig(configDir string) (err error) {
 func (m *CompileFunction) zipPackage() (err error) {
 	projConfig := m.ProjectYamlFile
 	projectPath := projConfig.ProjectPath
-	lambdaFuncName := fmt.Sprintf("%s%s", projConfig.Name, m.Stage)
+	lambdaFuncName := fmt.Sprintf("%s%s", str.CamelString(m.Stage), projConfig.Name)
 
 	// zip
 	logrus.Info("zip building zip file")

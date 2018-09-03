@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 
 	"github.com/haozzzzzzzz/go-rapid-development/tools/api/com/project"
+	"github.com/haozzzzzzzz/go-rapid-development/utils/str"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -25,7 +26,7 @@ func NewSAMTempalteConfig(stage string, projConfig *ProjectYamlFile, awsConfig *
 		ProjectYamlFile:     projConfig,
 		AWSYamlFile:         awsConfig,
 		SAMTemplateYamlFile: NewSAMTemplateYamlFile(),
-		LambdaFunctionName:  fmt.Sprintf("%s%s", projConfig.Name, stage),
+		LambdaFunctionName:  fmt.Sprintf("%s%s", str.CamelString(stage), projConfig.Name),
 	}
 
 	err = config.Build()

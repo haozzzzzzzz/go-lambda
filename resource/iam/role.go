@@ -135,8 +135,26 @@ func (m *Role) AddXRayPolicy() {
 	m.AddPolicy(policy)
 }
 
-func (m *Role) AddSNSPolicy() {
+func (m *Role) AddVPCPolicy() {
+	policy := &Policy{
+		PolicyName: "AWSLambdaVPCAccessExecutionRole",
+	}
+	policy.PolicyDocument.Version = "2012-10-17"
+	statement := &policy.PolicyDocument.Statement
+	*statement = append(*statement, &PolicyDocumentStatement{
+		Effect:   "Allow",
+		Resource: "*",
+		Action: []string{
+			"logs:CreateLogGroup",
+			"logs:CreateLogStream",
+			"logs:PutLogEvents",
+			"ec2:CreateNetworkInterface",
+			"ec2:DescribeNetworkInterfaces",
+			"ec2:DeleteNetworkInterface",
+		},
+	})
 
+	m.AddPolicy(policy)
 }
 
 func NewExecutionRole(roleName string) (role *Role) {
@@ -180,8 +198,8 @@ func NewExecutionRole(roleName string) (role *Role) {
 			role.AddKinesisPolicy()
 		case resource.XRayResourceType:
 			role.AddXRayPolicy()
-		case resource.SNSResourceType:
-			role.AddSNSPolicy()
+		case resource.VPCResourceType:
+			role.AddVPCPolicy()
 		}
 	}
 

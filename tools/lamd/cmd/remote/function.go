@@ -91,7 +91,7 @@ func (m *RemoteLambdaFunction) Run() (err error) {
 	}
 
 	strDayStartTime := time2.DateStringFormat(dayStartTime)
-	snakeLambdaFunctionName := fmt.Sprintf("%s-%s", str.SnakeString(projectConfig.Name), m.Stage)
+	snakeLambdaFunctionName := fmt.Sprintf("%s-%s", m.Stage, str.SnakeString(projectConfig.Name))
 	snakeLambdaFunctionName = strings.Replace(snakeLambdaFunctionName, "_", "-", -1)
 	s3Prefix := fmt.Sprintf("%s/%s", snakeLambdaFunctionName, strDayStartTime)
 	_, err = awsYamlFile.RunAWSCliCommand(
