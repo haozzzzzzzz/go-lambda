@@ -10,7 +10,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/haozzzzzzzz/go-lambda/proj"
 	"github.com/haozzzzzzzz/go-rapid-development/utils/str"
-	time2 "github.com/haozzzzzzzz/go-rapid-development/utils/time"
+	time2 "github.com/haozzzzzzzz/go-rapid-development/utils/utime"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
